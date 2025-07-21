@@ -20,9 +20,15 @@ class RegisterFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('firstname', TextType::class)
-            ->add('lastname', TextType::class)
-            ->add('username', TextType::class)
+            ->add('firstname', TextType::class, [
+                'label' => 'Prénom',
+            ])
+            ->add('lastname', TextType::class, [
+                'label' => 'Nom',
+            ])
+            ->add('username', TextType::class, [
+                'label' => "Nom d'utilisateur",
+            ])
             ->add('email', EmailType::class)
             // Champ pour le mot de passe avec confirmation ( deux champs identiques requis)
             ->add('password', RepeatedType::class, [
@@ -37,7 +43,7 @@ class RegisterFormType extends AbstractType
             ->add('profileImage', FileType::class, [
                 'required' => false,
                 'mapped' => false,
-                'label' => 'Photo de profil (fichier image)',
+                'label' => 'Photo de profil',
                 'constraints' => [
                     new File([
                         'maxSize' => '2M',
@@ -47,7 +53,7 @@ class RegisterFormType extends AbstractType
                             'image/webp',
                             'image/gif'
                         ],
-                        'mimeTypesMessage' => 'Veuillez uploader un fichier image valide (JPEG, PNG, WEBP, GIF)', 
+                        'mimeTypesMessage' => 'Veuillez uploader un fichier image valide (JPEG, PNG, WEBP, GIF)',
                     ])
                     ],
             ])
