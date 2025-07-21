@@ -4,8 +4,10 @@ namespace App\Entity;
 
 use App\Repository\ChatUserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\MetaData\ApiResource;
 
 #[ORM\Entity(repositoryClass: ChatUserRepository::class)]
+#[ApiResource]
 class ChatUser
 {
     #[ORM\Id]

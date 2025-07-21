@@ -6,8 +6,11 @@ use App\Repository\PostRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Metadata\ApiResource;
 
 #[ORM\Entity(repositoryClass: PostRepository::class)]
+#[ApiResource]
 class Post
 {
     #[ORM\Id]
@@ -24,7 +27,11 @@ class Post
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $video = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(nullable: true, type: 'json')]
+    #[Assert\All([
+        new Assert\Choice(['choices' => ['public', 'friends', 'private'],
+        'message' => "La valeur {{ value }} n'est pas autorisée. Valeurs autorisées: public, privat, friends "])
+    ])]
     private ?array $visibility = null;
 
     #[ORM\Column]

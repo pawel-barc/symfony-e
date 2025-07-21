@@ -5,8 +5,11 @@ namespace App\Entity;
 use App\Repository\PrivateMessageRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Metadata\ApiResource;
 
 #[ORM\Entity(repositoryClass: PrivateMessageRepository::class)]
+#[ApiResource]
 class PrivateMessage
 {
     #[ORM\Id]
@@ -32,7 +35,13 @@ class PrivateMessage
     private ?string $video = null;
 
     #[ORM\Column(nullable: true, type: Types::JSON)]
-    private ?array $reactions = null;
+    #[Assert\All([
+        new Assert\Choice([
+            'choices' => ['like', 'love', 'laugh', 'surprised', 'sad', 'angry', 'fire', 'clap', 'thinking'],
+            'message' => "Le valeur {{ value }} n'est pas autorisée."
+        ])
+    ])]
+    private ?array $reactions = [];
 
     #[ORM\Column]
     private ?\DateTimeImmutable $sendingDateTime = null;
@@ -46,6 +55,7 @@ class PrivateMessage
     public function __construct() 
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->sendingDateTime = new \DateTimeImmutable();
         $this->isRead = false;
     }
 

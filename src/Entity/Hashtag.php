@@ -6,8 +6,10 @@ use App\Repository\HashtagRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
 
 #[ORM\Entity(repositoryClass: HashtagRepository::class)]
+#[ApiResource]
 class Hashtag
 {
     #[ORM\Id]

@@ -4,8 +4,10 @@ namespace App\Entity;
 
 use App\Repository\RepostRepository;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
 
 #[ORM\Entity(repositoryClass: RepostRepository::class)]
+#[ApiResource]
 class Repost
 {
     #[ORM\Id]

@@ -6,8 +6,10 @@ use App\Repository\ChatRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
 
 #[ORM\Entity(repositoryClass: ChatRepository::class)]
+#[ApiResource]
 class Chat
 {
     #[ORM\Id]
@@ -37,6 +39,7 @@ class Chat
     {
         $this->privateMessages = new ArrayCollection();
         $this->chatUsers = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int

@@ -4,8 +4,10 @@ namespace App\Entity;
 
 use App\Repository\PostHashtagRepository;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
 
 #[ORM\Entity(repositoryClass: PostHashtagRepository::class)]
+#[ApiResource]
 class PostHashtag
 {
     #[ORM\Id]

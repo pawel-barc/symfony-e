@@ -4,8 +4,10 @@ namespace App\Entity;
 
 use App\Repository\CommentLikeRepository;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
 
 #[ORM\Entity(repositoryClass: CommentLikeRepository::class)]
+#[ApiResource]
 class CommentLike
 {
     #[ORM\Id]
