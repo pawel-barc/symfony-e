@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/feed.css') }}">
+{% endblock %}
+
+{% block title %}Posts{% endblock %}
+
+{% block body %}
+    <div class="feed-container">
+        <div class="feed-main">
+            <div class="feed-post-box">
+                <form method="post" action="{{ path('app_post') }}">
+                    <textarea name="content" class="post-input" placeholder="Tweeter..."></textarea>
+                    <div class="post-actions">
+                        <button type="submit" class="post-button">Poster</button>
+                    </div>
+                </form>
+            </div>
+
+            <div>
+                <h2>Publications</h2>
+                {% for post in posts %}
+                    <div class="post">
+                        <p>{{ post.text }}</p>
+                        <small>Posté par {{ post.author.username }} le {{ post.createdAt|date('d/m/Y H:i') }}</small>
+                    </div>
+                {% else %}
+                    <p>Aucune publication.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
