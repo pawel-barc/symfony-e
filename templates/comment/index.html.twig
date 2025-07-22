@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commentaires{% endblock %}
+
+{% block body %}
+    <h1>Liste des Commentaires</h1>
+
+    <a href="{{ path('app_comment_new') }}">Nouveau commentaire</a>
+
+    <ul>
+        {% for comment in comments %}
+            <li>
+                <strong>{{ comment.author.email }}</strong> - {{ comment.createdAt|date('d/m/Y H:i') }}<br>
+                {{ comment.text }}
+
+                {% if comment.image %}
+                    <div><img src="{{ comment.image }}" alt="Image du commentaire" style="max-width:200px"></div>
+                {% endif %}
+
+                {% if comment.video %}
+                    <div><video src="{{ comment.video }}" controls style="max-width:300px"></video></div>
+                {% endif %}
+            </li>
+        {% else %}
+            <li>Aucun commentaire pour l'instant.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+

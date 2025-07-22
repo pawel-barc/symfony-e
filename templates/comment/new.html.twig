@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau Commentaire{% endblock %}
+
+{% block body %}
+    <h1>Créer un nouveau commentaire</h1>
+
+    {{ form_start(form) }}
+    {{ form_row(form.text) }}
+    {{ form_row(form.image) }}
+    {{ form_row(form.video) }}
+
+    <button class="btn">Envoyer</button>
+    {{ form_end(form) }}
+
+    <a href="{{ path('app_comment_index') }}">Retour à la liste</a>
+{% endblock %}

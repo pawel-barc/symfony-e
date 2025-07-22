@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail du Post{% endblock %}
+
+{% block body %}
+    <div class="post-detail">
+        <h1>Post</h1>
+        <div class="post">
+            <p>{{ post.text }}</p>
+            <small>Posté par {{ post.author.username }} le {{ post.createdAt|date('d/m/Y H:i') }}</small>
+        </div>
+
+        <a href="{{ path('app_feed') }}">Retour au flux</a>
+    </div>
+{% endblock %}
