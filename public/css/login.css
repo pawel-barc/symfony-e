@@ -1,0 +1,65 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #000000;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+}
+.login-container {
+    width: 100%;
+    max-width: 500px;
+    padding: 40px;
+    border-radius: 16px;
+    border: 1px solid #333;
+    background-color: #15202b;
+}
+h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: white;
+}
+label {
+    color: white;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.password-login {
+    border-color: #1da1f2;
+    color: #1da1f2;
+}
+.btn-primary {
+    border-radius: 9999px;
+    padding: 10px 20px;
+    width: 100%;
+    background-color: #1da1f2;
+    border: none;
+    font-weight: 700;
+    font-size: 16px;
+    color: white;
+}
+.checkbox label {
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 0;
+    display: inline;
+}
+.alert {
+    border-radius: 9999px;
+}
+.small-text {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #aaa;
+}
+a {
+    color: #1da1f2;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
