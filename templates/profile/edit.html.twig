@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier le profil{% endblock %}
+
+{% block body %}
+
+<div>
+    <h1>Modifier le profil</h1>
+    {# Flash messages #}
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {# Image du profil #}
+    {% if app.user.profileImage %}
+        <strong>Image actuelle:</strong><br>
+        <img src="{{ asset('uploads/profile_images/' ~ app.user.profileImage) }}"/>
+    {% endif %}
+
+    {# Formulaire du profil #}
+    {{ form_start(profileForm, {'attr': {'enctype': 'multipart/form-data', 'data-turbo': 'false'}}) }}
+        {{ form_row(profileForm.firstname) }}
+        {{ form_row(profileForm.lastname) }}
+        {{ form_row(profileForm.username) }}
+        {{ form_row(profileForm.email) }}
+        {{ form_row(profileForm.password) }}
+        {{ form_row(profileForm.profileImage) }}
+        {{ form_row(profileForm.bio) }}
+
+        <button type="submit">Mettre à jour</button>
+    {{ form_end(profileForm) }}    
+</div>
+{% endblock %}
