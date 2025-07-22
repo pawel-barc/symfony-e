@@ -1,0 +1,96 @@
+body{
+    display: flex;
+}
+
+.feed-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    font-family: Arial, sans-serif;
+}
+
+
+.feed-main {
+    width: 1200px;
+    border-right: 1px solid #51515180;
+}
+
+.feed-tabs {
+    display: flex;
+    justify-content: space-around;
+    border-bottom: 1px solid #51515180;
+    padding: 10px 0;
+}
+
+.tab {
+    cursor: pointer;
+    padding: 10px;
+    font-weight: bold;
+    color: #536471;
+}
+
+.tab.active {
+    color: #1DA1F2;
+    border-bottom: 3px solid #1DA1F2;
+}
+
+.feed-post-box {
+    display: flex;
+    padding: 15px;
+    border-bottom: 1px solid #51515180;
+}
+
+.profile-picture {
+    width: 50px;
+    height: 50px;
+    background-color: #ccc;
+    border-radius: 50%;
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.post-content {
+    flex: 1;
+}
+
+.post-input {
+    border: none;
+    outline: none;
+    padding: 10px 0;
+    color: white;
+}
+
+.post-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+}
+
+.add-media {
+    color: #1DA1F2;
+    cursor: pointer;
+}
+
+.post-button {
+    background-color: #1DA1F2;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 9999px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.feed-sidebar {
+    width: 350px;
+    padding: 10px;
+}
+
+.search-bar, .trending, .suggestions {
+    background-color: #F7F9F9;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
