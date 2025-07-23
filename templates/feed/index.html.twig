@@ -9,56 +9,22 @@
 
 {% block body %}
     <div class="feed-container">
+
+        <div class="feed-navbar">
+        {% include 'navbar/index.html.twig' %}
+        </div>
+
         <div class="feed-main">
-            <div class="feed-tabs">
-                <div class="tab active">Pour vous</div>
-                <div class="tab">Abonnements</div>
-            </div>
-
-            <div class="feed-post-box">
-                <div class="profile-picture">Image Profil</div>
-                <div class="post-content">
-                    <form method="post" action="{{ path('app_post') }}">
-                        <textarea class="post-input" name="content" placeholder="Tweeter..."></textarea>
-                        <div class="post-actions">
-                            <svg width="30px" height="30px" viewBox="0 0 24 24" fill="#1DA1F2" xmlns="http://www.w3.org/2000/svg">
-                            </svg>
-                            <button type="submit" class="post-button">Poster</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <div>
-                <h2>Publications</h2>
-                {% for post in posts %}
-                    <div class="post">
-                        <p>{{ post.text }}</p>
-                        <small>Posté par {{ post.author.username }} le {{ post.createdAt|date('d/m/Y H:i') }}</small>
-                        <a href="{{ path('post_show', { id: post.id }) }}">Voir le post</a>
-                    </div>
-                {% else %}
-                    <p>Aucune publication.</p>
-                {% endfor %}
-
-                <h2>Commentaires</h2>
-                {% for comment in comments %}
-                    <div class="comment">
-                        <p>{{ comment.content }}</p>
-                        <small>Commenté par {{ comment.user.username }} le {{ comment.createdAt|date('d/m/Y H:i') }}</small>
-                    </div>
-                {% else %}
-                    <p>Aucun commentaire.</p>
-                {% endfor %}
-            </div>
+            {% include 'feed/_tabs.html.twig' %}
+            {% include 'post/_create_post.html.twig' %}
+            {% include 'post/_post_list.html.twig' %}
+            {% include 'comment/_comments.html.twig' %}
         </div>
 
         <div class="feed-sidebar">
-            <div class="search-bar">
-                <input type="text" placeholder="Rechercher..." />
-            </div>
-            <div class="trending">Tendances</div>
-            <div class="suggestions">Amis suggérés</div>
+            {% include 'feed/sidebar.html.twig' %}
         </div>
     </div>
+
+    <script src="{{ asset('js/feed.js') }}"></script>
 {% endblock %}

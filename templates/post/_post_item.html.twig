@@ -1,0 +1,27 @@
+<div class="post" data-post-id="{{ post.id }}">
+    <div class="post-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+        <div class="profile-picture-post">
+            {% if post.author and post.author.profileImage %}
+                <img src="{{ asset('uploads/profile_images/' ~ post.author.profileImage) }}" alt="Photo de {{ post.author.username }}" style="width: 40px; height: 40px; border-radius: 50%;">
+            {% else %}
+                <img src="uploads/profile_images/default-profile.png" alt="Image par défaut" style="width: 40px; height: 40px; border-radius: 50%;">
+            {% endif %}
+        </div>
+        <strong>{{ post.author.username }}</strong>
+    </div>
+
+    <p>{{ post.text }}</p>
+
+    {% if post.image %}
+        <img src="{{ asset(post.image) }}" style="max-width: 100%; max-height: 300px; margin-top: 10px;">
+    {% elseif post.video %}
+        <video controls style="max-width: 100%; max-height: 300px; margin-top: 10px;">
+            <source src="{{ asset(post.video) }}" type="video/mp4">
+            Votre navigateur ne supporte pas la lecture de vidéos.
+        </video>
+    {% endif %}
+
+    <small>Posté le {{ post.createdAt|date('d/m/Y H:i') }}</small>
+    <br>
+    <a href="{{ path('post_show', { id: post.id }) }}">Voir le post</a>
+</div>

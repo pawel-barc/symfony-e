@@ -1,0 +1,38 @@
+<div class="comment" data-comment-id="{{ comment.id }}" style="margin-left: {{ depth * 20 }}px; margin-bottom: 15px; padding: 10px; border-left: 2px solid #ddd;">
+    <div class="comment-content">
+        <p>{{ comment.text }}</p>
+        <small>
+            Par {{ comment.author.username }}
+            le {{ comment.createdAt|date('d/m/Y H:i') }}
+            • <a href="#" class="reply-link" data-comment-id="{{ comment.id }}">Répondre</a>
+        </small>
+    </div>
+
+    {# Formulaire de réponse (caché par défaut) #}
+    <div class="reply-form" id="reply-form-{{ comment.id }}" style="display: none; margin-top: 10px;">
+        {{ form_start(reply_forms[comment.id], {'action': path('app_comment_reply', {'parentId': comment.id})}) }}
+        {{ form_widget(reply_forms[comment.id].text, {'attr': {'placeholder': 'Écrire une réponse...', 'rows': 2}}) }}
+        <button type="submit" class="btn btn-sm btn-primary">Répondre</button>
+        {{ form_end(reply_forms[comment.id]) }}
+    </div>
+
+    {# Réponses imbriquées #}
+    {% if comment.childComments|length > 0 %}
+        <div class="replies" style="margin-top: 10px;">
+            {% for reply in comment.childComments %}
+                {{ include('comment/_comment_item.html.twig', { 'comment': reply, 'depth': depth + 1 }) }}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    document.querySelectorAll('.reply-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const commentId = this.getAttribute('data-comment-id');
+            const form = document.getElementById(`reply-form-${commentId}`);
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        });
+    });
+</script>

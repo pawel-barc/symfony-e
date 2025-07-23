@@ -23,11 +23,11 @@ final class RegisterController extends AbstractController
         // Création d'une nouvelle instance de user
         $user = new User();
         // Création du formulaire d'inscription lié à l'entité User
-        $form = $this->createForm(RegisterFormType::class, $user); 
+        $form = $this->createForm(RegisterFormType::class, $user);
         // Traitement de la requête HTTP
         $form->handleRequest($request);
 
-        // Si le formulaire a été soumis et est valide 
+        // Si le formulaire a été soumis et est valide
         if($form->isSubmitted() && $form->isValid()) {
             // Récupération du mot de passe brut
             $plainPassword = $form->get('password')->getData();
@@ -46,11 +46,11 @@ final class RegisterController extends AbstractController
                 $safeFilename = $slugger->slug($originalFilename);
                 // Création d'un nom de fichier unique avec une extension correcte
                 $newFilename = $safeFilename.'-'.uniqid().'.'.$profileImage->guessExtension();
-                
+
                 // Déplacement du fichier uploadé vers le dossier configuré.
                 try {
                     $profileImage->move(
-                        $this->getParameter('profile_image_directory'), // Le chemin configuré dans le framework.yaml 
+                        $this->getParameter('profile_image_directory'), // Le chemin configuré dans le framework.yaml
                          $newFilename
                     );
                     // Si une erreur survient lors de l'upload, message d'erreur et redirection
@@ -74,7 +74,7 @@ final class RegisterController extends AbstractController
         }
 
         // Si le formulaire n'est pas soumis ou contient des erreurs, affichage du formulaire.
-        return $this->render('register/index.html.twig', [
+        return $this->render('register/sidebar.html.twig', [
             'registerForm' => $form->createView(), // Vue du formulaire pour twig
         ]);
     }

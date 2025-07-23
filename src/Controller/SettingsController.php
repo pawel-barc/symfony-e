@@ -11,6 +11,6 @@ final class SettingsController extends AbstractController
     #[Route('/settings', name: 'app_settings')]
     public function notifications(): Response
     {
-        return $this->render('settings/index.html.twig');
+        return $this->render('settings/sidebar.html.twig');
     }
 }

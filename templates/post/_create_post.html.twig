@@ -1,0 +1,55 @@
+<div class="feed-post-box">
+    <div class="profile-picture">
+        {% if app.user and app.user.profileImage %}
+            <img src="{{ asset('/uploads/profile_images/' ~ app.user.profileImage) }}" alt="Image de profil" style="width: 50px; height: 50px; border-radius: 50%;">
+        {% else %}
+            <img src="/uploads/profile_images/default-profile.png" alt="Image par défaut" style="width: 50px; height: 50px; border-radius: 50%;">
+        {% endif %}
+    </div>
+
+    <div class="post-content">
+        <form id="post-form" method="post" action="{{ path('app_post') }}" enctype="multipart/form-data">
+            <textarea class="post-input" name="content" placeholder="Tweeter..."></textarea>
+
+            <div id="media-preview" style="display: flex; margin-top: 10px; gap: 10px;">
+                <div id="image-container" class="media-container" style="position: relative; display: none;">
+                    <img id="image-preview" style="border-radius: 20px; max-width: 100%; max-height: 300px;">
+                    <button type="button" class="remove-media" style="
+                        position: absolute;
+                        top: 5px;
+                        right: 5px;
+                        background: none;
+                        border: none;
+                        cursor: pointer;
+                    ">
+                        <img src="/icons/close.svg" alt="close icon" style="width: 20px; height: 20px;">
+                    </button>
+                </div>
+
+                <div id="video-container" class="media-container" style="position: relative; display: none;">
+                    <video id="video-preview" controls style="border-radius: 20px; max-width: 100%; max-height: 300px;"></video>
+                    <button type="button" class="remove-media" style="
+                        position: absolute;
+                        top: 0;
+                        right: 0;
+                        background: none;
+                        border: none;
+                        cursor: pointer;
+                    ">
+                        <img src="/icons/close.svg" alt="close icon" class="close_icon" style="width: 20px; height: 20px;">
+                    </button>
+                </div>
+            </div>
+
+            <div class="post-actions">
+                <label for="media-upload" style="cursor: pointer;">
+                    <img src="/icons/media.svg" alt="media icon"/>
+                    <input type="file" id="media-upload" name="media" accept="image/*,video/*" style="display: none;">
+                </label>
+                <button type="submit" class="post-button">Poster</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="posts-list"></div>
