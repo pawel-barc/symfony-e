@@ -1,5 +1,5 @@
 <div id="posts-list">
-    <h2>Publications</h2>
+    <button class="reload-feed-btn">Recharger mon feed</button>
     {% for post in posts %}
         {% include 'post/_post_item.html.twig' with { post: post } %}
     {% else %}
