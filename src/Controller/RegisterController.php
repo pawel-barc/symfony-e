@@ -74,7 +74,7 @@ final class RegisterController extends AbstractController
         }
 
         // Si le formulaire n'est pas soumis ou contient des erreurs, affichage du formulaire.
-        return $this->render('register/sidebar.html.twig', [
+        return $this->render('register/index.html.twig', [
             'registerForm' => $form->createView(), // Vue du formulaire pour twig
         ]);
     }

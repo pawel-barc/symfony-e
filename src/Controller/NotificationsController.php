@@ -11,6 +11,6 @@ final class NotificationsController extends AbstractController
     #[Route('/notifications', name: 'app_notifications')]
     public function notifications(): Response
     {
-        return $this->render('notifications/sidebar.html.twig');
+        return $this->render('notifications/index.html.twig');
     }
 }

@@ -1,7 +1,6 @@
 {% extends 'base.html.twig' %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/feed.css') }}">
 {% endblock %}
 
@@ -9,22 +8,14 @@
 
 {% block body %}
     <div class="feed-container">
-
-        <div class="feed-navbar">
         {% include 'navbar/index.html.twig' %}
-        </div>
-
         <div class="feed-main">
             {% include 'feed/_tabs.html.twig' %}
             {% include 'post/_create_post.html.twig' %}
             {% include 'post/_post_list.html.twig' %}
             {% include 'comment/_comments.html.twig' %}
         </div>
-
-        <div class="feed-sidebar">
-            {% include 'feed/sidebar.html.twig' %}
-        </div>
+        {% include 'sidebar/index.html.twig' %}
     </div>
-
     <script src="{{ asset('js/feed.js') }}"></script>
 {% endblock %}

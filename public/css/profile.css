@@ -1,0 +1,11 @@
+.profile-container{
+    display: flex;
+    background-color: #0d1117 !important;
+    color: white;
+}
+
+.profile-main{
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+}

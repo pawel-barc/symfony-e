@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 // Cette classe gère le profil de l'utilisateur connecté ainsi que les profils publics.
 final class ProfileController extends AbstractController
 {
-    // Cette route est accessible via l'URL /profile/me/edit, et est nommeé app_profile_edit dans l'application. 
+    // Cette route est accessible via l'URL /profile/me/edit, et est nommeé app_profile_edit dans l'application.
     #[Route('/profile/me/edit', name: 'app_profile_edit')]
     // Cette fonction permet d'afficher et modifier les données personnelles de l'utilisateur connecté.
     public function editProfile(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): Response
@@ -71,12 +71,12 @@ final class ProfileController extends AbstractController
         // Recherche de l'utilisateur ciblé grâce à la méthode findOneBy et au nom d'utilisateur.
         $user = $userRepository->findOneBy(['username' => $username]);
 
-        // Si l'utilisateur est introuvable, affichage d'un message d'erreur.  
+        // Si l'utilisateur est introuvable, affichage d'un message d'erreur.
         if (!$user) {
             throw $this->createNotFoundException("Utilisateur introuvable.");
         }
         // Affichage du profil via le fichier public.html.twig et l'objet $user.
-        return $this->render('profile/public.html.twig', [
+        return $this->render('profile/index.html.twig', [
             'user' => $user,
         ]);
     }

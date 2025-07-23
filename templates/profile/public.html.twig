@@ -16,31 +16,31 @@
         <p>{{ user.bio }}</p>
         <p>Inscrit le {{ user.createdAt|date('d/m/Y') }}</p>
         <p>
-            <strong>{{ user.getFollows|length }}</strong> abonnements                        
+            <strong>{{ user.getFollows|length }}</strong> abonnements
             <strong>{{ user.getFollowers|length }}</strong> abonnés
         </p>
         <hr>
-        {# Affichage des publications avec le format approprié #}    
+        {# Affichage des publications avec le format approprié #}
         <h3>Publications</h3>
         {% for post in user.posts %}
             <div>
                 {% if post.text %}
                     <p>{{ post.text }}</p>
                 {% endif %}
-                
+
                 {% if post.image %}
                     <img src="{{asset('/uploads/' ~ post.image) }}" alt="image">
                 {% endif %}
-                
+
                 {% if post.video %}
                     <video controls>
                         <source src="{{asset('uploads/' ~ post.video) }}" type="video/mp4">
                     </video>
-                {% endif %}}    
+                {% endif %}}
                 <small>{{ post.createdAt|date('d/m/Y H:i') }}</small>
             </div>
         {% else %}
             <p>Aucun post pour le moment</p>
         {% endfor %}
     </div>
-{% endblock %}        
+{% endblock %}

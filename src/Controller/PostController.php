@@ -108,7 +108,7 @@ class PostController extends AbstractController
 
         $posts = $em->getRepository(Post::class)->findBy([], ['createdAt' => 'DESC']);
 
-        return $this->render('post/sidebar.html.twig', [
+        return $this->render('post/index.html.twig', [
             'posts' => $posts,
         ]);
     }
