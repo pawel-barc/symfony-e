@@ -8,7 +8,9 @@
     {% if users is not empty %}
         <ul>
             {% for user in users %}
-                <li>{{ user.username }} - <a href="{{path('app_user_profile', {'username': user.username}) }}">Voir le profil</a></li>
+                <li>
+                    <strong>{{user.firstname}} {{user.lastname}}</strong> ({{ user.username}}) - <a href="{{path('app_user_profile', {'username': user.username}) }}">Voir le profil</a>
+                </li>
             {% endfor %}
         </ul>
     {% else %}

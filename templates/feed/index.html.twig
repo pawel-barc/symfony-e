@@ -55,13 +55,15 @@
 
         <div class="feed-sidebar">
             <div class="search-bar">
-                <form method="get" action="{{ path('user_search') }}">
-                    <input type="text" name="q" placeholder="Rechercher un utilisateur" />
+                <form method="get" action="{{ path('ajax_user_search') }}">
+                    <input type="text" name="q" placeholder="Rechercher un utilisateur" id="search-input" autocomplete="off" />
                     <button type="submit">🔍</button>
                 </form>
+                <div class="autocomplete-results" id="search-results"></div>
             </div>
             <div class="trending">Tendances</div>
             <div class="suggestions">Amis suggérés</div>
         </div>
     </div>
+    <script src="{{ asset('js/user-search.js') }}"></script>
 {% endblock %}
