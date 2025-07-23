@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Profil de {{ user.username }} {% endblock %}
+
+{% block body %}
+{# Affichage des données personnelles de l'utilisateur, y compris ces publications et abonnements #}
+    <div>
+        <h2>{{ user.firstname }} {{ user.lastname }}</h2>
+        <p>{{ user.getPosts|length }} posts</p>
+        {% if user.profileImage %}
+            <img src="{{ asset('uploads/profile_images/' ~ user.profileImage) }}" alt="Photo de profil de {{user.username}}"><br>
+        {% endif %}
+        <button>Suivre</button><br>
+        <h2>{{ user.firstname}} {{ user.lastname }}</h2>
+        <p>{{ user.username}}</p>
+        <p>{{ user.bio }}</p>
+        <p>Inscrit le {{ user.createdAt|date('d/m/Y') }}</p>
+        <p>
+            <strong>{{ user.getFollows|length }}</strong> abonnements                        
+            <strong>{{ user.getFollowers|length }}</strong> abonnés
+        </p>
+        <hr>
+        {# Affichage des publications avec le format approprié #}    
+        <h3>Publications</h3>
+        {% for post in user.posts %}
+            <div>
+                {% if post.text %}
+                    <p>{{ post.text }}</p>
+                {% endif %}
+                
+                {% if post.image %}
+                    <img src="{{asset('/uploads/' ~ post.image) }}" alt="image">
+                {% endif %}
+                
+                {% if post.video %}
+                    <video controls>
+                        <source src="{{asset('uploads/' ~ post.video) }}" type="video/mp4">
+                    </video>
+                {% endif %}}    
+                <small>{{ post.createdAt|date('d/m/Y H:i') }}</small>
+            </div>
+        {% else %}
+            <p>Aucun post pour le moment</p>
+        {% endfor %}
+    </div>
+{% endblock %}        
