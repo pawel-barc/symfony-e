@@ -44,8 +44,8 @@
                 <h2>Commentaires</h2>
                 {% for comment in comments %}
                     <div class="comment">
-                        <p>{{ comment.content }}</p>
-                        <small>Commenté par {{ comment.user.username }} le {{ comment.createdAt|date('d/m/Y H:i') }}</small>
+                        <p>{{ comment.text }}</p>
+                        <small>Commenté par {{ comment.author.username }} le {{ comment.createdAt|date('d/m/Y H:i') }}</small>
                     </div>
                 {% else %}
                     <p>Aucun commentaire.</p>
