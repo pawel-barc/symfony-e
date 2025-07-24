@@ -45,3 +45,86 @@
     margin-bottom: 15px;
     border-radius: 8px;
 }
+
+.tweet {
+    color: white;
+    padding: 12px;
+    margin: 16px auto;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.tweet-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    margin-right: 12px;
+    object-fit: cover;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+}
+
+.user-info .timestamp {
+    color: #657786;
+    font-size: 13px;
+    margin-top: 2px;
+}
+
+.repost-notice {
+    color: #536471;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.tweet-text {
+    font-size: 15px;
+    margin-bottom: 10px;
+    white-space: pre-line;
+}
+
+.tweet-media img,
+.tweet-media video {
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.tweet-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    color: #536471;
+    font-size: 14px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #536471;
+}
+
+.action-btn:hover {
+    color: #1da1f2;
+}
+
+.repost-btn.reposted {
+    color: #17bf63;
+}
+
+.like-btn.liked {
+    color: #e0245e;
+}
+

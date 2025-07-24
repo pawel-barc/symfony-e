@@ -2,50 +2,49 @@
     <link rel="stylesheet" href="{{ asset('css/post.css') }}">
 {% endblock %}
 
-<div class="post" data-post-id="{{ post.id }}">
-    <div class="post-header">
-        <div class="profile-picture-post">
-            {% if post.author and post.author.profileImage %}
-                <img src="{{ asset('uploads/profile_images/' ~ post.author.profileImage) }}" alt="Photo de {{ post.author.username }}">
-            {% else %}
-                <img src="{{ asset('uploads/profile_images/default-profile.png') }}" alt="Image par défaut">
+<article class="tweet" data-post-id="{{ post.id }}">
+    <header class="tweet-header">
+        <img class="avatar" src="{% if post.author and post.author.profileImage %}
+            {{ asset('uploads/profile_images/' ~ post.author.profileImage) }}
+        {% else %}
+            {{ asset('uploads/profile_images/default-profile.png') }}
+        {% endif %}" alt="Photo de {{ post.author.username }}">
+
+        <div class="user-info">
+            <strong>{{ post.author.username }}</strong>
+            <span class="timestamp">· {{ post.createdAt|date('d M Y H:i') }}</span>
+            {% if post.originalPost is defined and post.originalPost is not null %}
+                <small class="repost-notice">🔁 a reposté {{ post.originalPost.author.username }}</small>
             {% endif %}
         </div>
-        <strong>{{ post.author.username }}</strong>
+    </header>
 
-        {# Afficher si c'est un repost #}
-        {% if post.originalPost is defined and post.originalPost is not null %}
-            <small class="repost-notice">🔁 a reposté {{ post.originalPost.author.username }}</small>
-        {% endif %}
-    </div>
-
-    {# Contenu du post #}
-    <p>{{ post.text }}</p>
+    <p class="tweet-text">{{ post.text }}</p>
 
     {% if post.image %}
-        <img src="{{ asset(post.image) }}" class="post-media">
+        <figure class="tweet-media">
+            <img src="{{ asset(post.image) }}" alt="">
+        </figure>
     {% elseif post.video %}
-        <video controls class="post-media">
-            <source src="{{ asset(post.video) }}" type="video/mp4">
-        </video>
+        <figure class="tweet-media">
+            <video controls>
+                <source src="{{ asset(post.video) }}" type="video/mp4">
+            </video>
+        </figure>
     {% endif %}
 
-    <small>Posté le {{ post.createdAt|date('d/m/Y H:i') }}</small>
-
-    <div class="post-actions">
-        {# Repost Button #}
-        <button class="repost-btn {{ post.isRepostedByUser(app.user) ? 'reposted' : '' }}"
+    <footer class="tweet-footer">
+        <button class="action-btn repost-btn {{ post.isRepostedByUser(app.user) ? 'reposted' : '' }}"
                 data-post-id="{{ post.id }}">
-            <span class="repost-icon">↻</span>
-            <span class="repost-count">{{ post.reposts.count }}</span>
+            🔁 <span class="repost-count">{{ post.reposts.count }}</span>
         </button>
-    <div class="like-section">
-        <button class="like-btn {% if app.user and post.postLikes|filter(like => like.author.id == app.user.id)|length > 0 %}liked{% endif %}"
+
+        <button class="action-btn like-btn {% if app.user and post.postLikes|filter(like => like.author.id == app.user.id)|length > 0 %}liked{% endif %}"
                 data-post-id="{{ post.id }}"
                 data-likes-count="{{ post.postLikes|length }}">
             ❤️ <span class="like-count">{{ post.postLikes|length }}</span>
         </button>
-    </div>
-    <a href="{{ path('post_show', { id: post.id }) }}">Voir le post</a>
-</div>
-</div>
+
+        <a class="action-btn" href="{{ path('post_show', { id: post.id }) }}">📄 Voir le post</a>
+    </footer>
+</article>
