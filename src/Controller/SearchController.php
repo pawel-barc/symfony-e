@@ -25,9 +25,9 @@ final class SearchController extends AbstractController
         // Si la requête n'est pas vide on recherche des utilisateurs dont le username contient la chaîne.
         if ($query) {
             $users = $userRepository->createQueryBuilder('u')
-            ->where('u.username LIKE :query')
-            ->orWhere('u.firstname LIKE :query')
-            ->orWhere('u.lastname LIKE :query')
+            ->where('LOWER(u.username) LIKE LOWER(:query)')
+            ->orWhere('LOWER(u.firstname) LIKE LOWER(:query)')
+            ->orWhere('LOWER(u.lastname) LIKE LOWER(:query)')
             ->setParameter('query', '%' . $query . '%')//Correspondance partielle
             ->setMaxResults(4)
             ->getQuery()

@@ -10,9 +10,15 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Metadata\ApiResource;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ApiResource]
+#[UniqueEntity(
+    fields: ['username'],
+    message: "Ce nom d'utilisateur est déjà pris."
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     // ID

@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         try {
-            // Envoie une requête AJAX vesr le serveur avec la valeur encodée de la recherche
+            // Envoie une requête AJAX vers le serveur avec la valeur encodée de la recherche
             const response = await fetch(
                 "/ajax/user-search?q=" + encodeURIComponent(query)
             );
@@ -35,14 +35,28 @@ document.addEventListener("DOMContentLoaded", function () {
                         </div>
                         `;
                     })
-                    .join(""); // Combine tout les éléments en une seule chaîne HTML
+                    .join(""); // Combine tous les éléments en une seule chaîne HTML
             } else {
                 resultsContainer.innerHTML =
                     "<div>Aucun utilisateur trouvé</div>";
             }
         } catch (error) {
-            // On affiche erreur dans le console
+            // On affiche l'erreur dans le console
             console.error("Erreur AJAX", error);
+        }
+    });
+
+    // Réinitialise le champ de recherche au chargement initial.
+    searchInput.value = "";
+    resultsContainer.innerHTML = "";
+
+    // Aussi, écoute le changement de visibilité
+    window.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === "visible") {
+            if (searchInput && resultsContainer) {
+                searchInput.value = "";
+                resultsContainer.innerHTML = "";
+            }
         }
     });
 });
