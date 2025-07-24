@@ -8,14 +8,18 @@
 
 {% block body %}
     <div class="feed-container">
+
         {% include 'navbar/index.html.twig' %}
+
         <div class="feed-main">
             {% include 'feed/_tabs.html.twig' %}
             {% include 'post/_create_post.html.twig' %}
             {% include 'post/_post_list.html.twig' %}
             {% include 'comment/_comments.html.twig' %}
         </div>
+
         {% include 'sidebar/index.html.twig' %}
+
     </div>
     <script src="{{ asset('js/feed.js') }}"></script>
 {% endblock %}

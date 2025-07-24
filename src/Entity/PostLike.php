@@ -15,13 +15,13 @@ class PostLike
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'postLikes')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $author = null;
-
-    #[ORM\ManyToOne(inversedBy: 'postLikes')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: 'postLikes')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Post $post = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'postLikes')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private ?User $author = null;
 
     private ?\DateTimeImmutable $createdAt = null;
 

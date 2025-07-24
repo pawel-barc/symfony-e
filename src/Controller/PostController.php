@@ -116,10 +116,22 @@ class PostController extends AbstractController
     #[Route('/post/{id}', name: 'post_show', methods: ['GET'])]
     public function show(Post $post): Response
     {
-        return $this->render('post/show.html.twig', [
+        return $this->render('post/_post_details.html.twig', [
             'post' => $post,
         ]);
     }
 
-
+    #[Route('/post/{id}/json', name: 'post_json', methods: ['GET'])]
+    public function getPostJson(Post $post): Response
+    {
+        return $this->json([
+            'id' => $post->getId(),
+            'text' => $post->getText(),
+            'image' => $post->getImage(),
+            'video' => $post->getVideo(),
+            'author' => $post->getAuthor()->getUsername(),
+            'createdAt' => $post->getCreatedAt()->format('d/m/Y H:i'),
+            // Ajoutez d'autres champs si nécessaire
+        ]);
+    }
 }

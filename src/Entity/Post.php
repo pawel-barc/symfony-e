@@ -8,6 +8,11 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Metadata\ApiResource;
+use App\Entity\User;
+use App\Entity\Comment;
+use App\Entity\PostLike;
+use App\Entity\Repost;
+use App\Entity\PostHashtag;
 
 #[ORM\Entity(repositoryClass: PostRepository::class)]
 #[ApiResource]
@@ -30,7 +35,7 @@ class Post
     #[ORM\Column(nullable: true, type: 'json')]
     #[Assert\All([
         new Assert\Choice(['choices' => ['public', 'friends', 'private'],
-        'message' => "La valeur {{ value }} n'est pas autorisée. Valeurs autorisées: public, privat, friends "])
+            'message' => "La valeur {{ value }} n'est pas autorisée. Valeurs autorisées: public, private, friends "])
     ])]
     private ?array $visibility = null;
 
@@ -38,8 +43,9 @@ class Post
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'posts')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: 'author_id', referencedColumnName: 'id', nullable: false)]
     private ?User $author = null;
+
 
     /**
      * @var Collection<int, Comment>
@@ -87,7 +93,6 @@ class Post
     public function setText(?string $text): static
     {
         $this->text = $text;
-
         return $this;
     }
 
@@ -99,7 +104,6 @@ class Post
     public function setImage(?string $image): static
     {
         $this->image = $image;
-
         return $this;
     }
 
@@ -111,7 +115,6 @@ class Post
     public function setVideo(?string $video): static
     {
         $this->video = $video;
-
         return $this;
     }
 
@@ -123,7 +126,6 @@ class Post
     public function setVisibility(?array $visibility): static
     {
         $this->visibility = $visibility;
-
         return $this;
     }
 
@@ -135,7 +137,6 @@ class Post
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 
@@ -147,7 +148,6 @@ class Post
     public function setAuthor(?User $author): static
     {
         $this->author = $author;
-
         return $this;
     }
 
@@ -172,7 +172,6 @@ class Post
     public function removeComment(Comment $comment): static
     {
         if ($this->comments->removeElement($comment)) {
-            // set the owning side to null (unless already changed)
             if ($comment->getPost() === $this) {
                 $comment->setPost(null);
             }
@@ -202,7 +201,6 @@ class Post
     public function removePostLike(PostLike $postLike): static
     {
         if ($this->postLikes->removeElement($postLike)) {
-            // set the owning side to null (unless already changed)
             if ($postLike->getPost() === $this) {
                 $postLike->setPost(null);
             }
@@ -232,13 +230,32 @@ class Post
     public function removeRepost(Repost $repost): static
     {
         if ($this->reposts->removeElement($repost)) {
-            // set the owning side to null (unless already changed)
             if ($repost->getPost() === $this) {
                 $repost->setPost(null);
             }
         }
 
         return $this;
+    }
+
+    public function getRepostsCount(): int
+    {
+        return $this->reposts->count();
+    }
+
+    public function isRepostedByUser(?User $user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        foreach ($this->reposts as $repost) {
+            if ($repost->getAuthor() === $user) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -262,7 +279,6 @@ class Post
     public function removePostHashtag(PostHashtag $postHashtag): static
     {
         if ($this->postHashtags->removeElement($postHashtag)) {
-            // set the owning side to null (unless already changed)
             if ($postHashtag->getPost() === $this) {
                 $postHashtag->setPost(null);
             }

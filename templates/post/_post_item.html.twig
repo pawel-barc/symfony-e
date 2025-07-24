@@ -1,27 +1,51 @@
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/post.css') }}">
+{% endblock %}
+
 <div class="post" data-post-id="{{ post.id }}">
-    <div class="post-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+    <div class="post-header">
         <div class="profile-picture-post">
             {% if post.author and post.author.profileImage %}
-                <img src="{{ asset('uploads/profile_images/' ~ post.author.profileImage) }}" alt="Photo de {{ post.author.username }}" style="width: 40px; height: 40px; border-radius: 50%;">
+                <img src="{{ asset('uploads/profile_images/' ~ post.author.profileImage) }}" alt="Photo de {{ post.author.username }}">
             {% else %}
-                <img src="uploads/profile_images/default-profile.png" alt="Image par défaut" style="width: 40px; height: 40px; border-radius: 50%;">
+                <img src="{{ asset('uploads/profile_images/default-profile.png') }}" alt="Image par défaut">
             {% endif %}
         </div>
         <strong>{{ post.author.username }}</strong>
+
+        {# Afficher si c'est un repost #}
+        {% if post.originalPost is defined and post.originalPost is not null %}
+            <small class="repost-notice">🔁 a reposté {{ post.originalPost.author.username }}</small>
+        {% endif %}
     </div>
 
+    {# Contenu du post #}
     <p>{{ post.text }}</p>
 
     {% if post.image %}
-        <img src="{{ asset(post.image) }}" style="max-width: 100%; max-height: 300px; margin-top: 10px;">
+        <img src="{{ asset(post.image) }}" class="post-media">
     {% elseif post.video %}
-        <video controls style="max-width: 100%; max-height: 300px; margin-top: 10px;">
+        <video controls class="post-media">
             <source src="{{ asset(post.video) }}" type="video/mp4">
-            Votre navigateur ne supporte pas la lecture de vidéos.
         </video>
     {% endif %}
 
     <small>Posté le {{ post.createdAt|date('d/m/Y H:i') }}</small>
-    <br>
+
+    <div class="post-actions">
+        {# Repost Button #}
+        <button class="repost-btn {{ post.isRepostedByUser(app.user) ? 'reposted' : '' }}"
+                data-post-id="{{ post.id }}">
+            <span class="repost-icon">↻</span>
+            <span class="repost-count">{{ post.reposts.count }}</span>
+        </button>
+    <div class="like-section">
+        <button class="like-btn {% if app.user and post.postLikes|filter(like => like.author.id == app.user.id)|length > 0 %}liked{% endif %}"
+                data-post-id="{{ post.id }}"
+                data-likes-count="{{ post.postLikes|length }}">
+            ❤️ <span class="like-count">{{ post.postLikes|length }}</span>
+        </button>
+    </div>
     <a href="{{ path('post_show', { id: post.id }) }}">Voir le post</a>
+</div>
 </div>

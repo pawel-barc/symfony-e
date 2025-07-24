@@ -15,12 +15,12 @@ class Repost
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'reposts')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'reposts')]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false)]
     private ?User $author = null;
 
-    #[ORM\ManyToOne(inversedBy: 'reposts')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: 'reposts')]
+    #[ORM\JoinColumn(name: 'post_id', referencedColumnName: 'id', nullable: false)]
     private ?Post $post = null;
 
     #[ORM\Column]
@@ -30,6 +30,7 @@ class Repost
     {
         $this->createdAt = new \DateTimeImmutable();
     }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -43,7 +44,6 @@ class Repost
     public function setAuthor(?User $author): static
     {
         $this->author = $author;
-
         return $this;
     }
 
@@ -55,7 +55,6 @@ class Repost
     public function setPost(?Post $post): static
     {
         $this->post = $post;
-
         return $this;
     }
 
@@ -67,7 +66,6 @@ class Repost
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 }
