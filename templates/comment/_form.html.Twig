@@ -1,0 +1,16 @@
+
+{{ form_start(form, {'attr': {'class': 'comment-form', 'data-post-id': post.id}}) }}
+<div class="form-group">
+    {{ form_widget(form.text, {'attr': {
+        'class': 'form-control',
+        'placeholder': 'Écrire un commentaire...',
+        'rows': 2
+    }}) }}
+</div>
+<div class="form-actions">
+    {% if form.image is defined %}
+        {{ form_widget(form.image) }}
+    {% endif %}
+    <button type="submit" class="btn btn-primary">Commenter</button>
+</div>
+{{ form_end(form) }}

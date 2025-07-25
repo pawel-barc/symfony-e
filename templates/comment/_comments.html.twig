@@ -1,11 +1,13 @@
+[file name]: _comments.html.twig
+[file content]
 <div class="comments-section">
-    <h3>Commentaires</h3>
+    <h3>Commentaires ({{ comments|length }})</h3>
 
     {% for comment in comments|filter(comment => comment.parentComment is null) %}
         <div class="comment-thread">
             {{ include('comment/_comment_item.html.twig', { 'comment': comment, 'depth': 0 }) }}
         </div>
     {% else %}
-        <p>Aucun commentaire pour le moment.</p>
+        <p class="no-comments">Aucun commentaire pour le moment. Soyez le premier à commenter !</p>
     {% endfor %}
 </div>

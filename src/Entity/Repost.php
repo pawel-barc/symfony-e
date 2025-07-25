@@ -4,10 +4,8 @@ namespace App\Entity;
 
 use App\Repository\RepostRepository;
 use Doctrine\ORM\Mapping as ORM;
-use ApiPlatform\Metadata\ApiResource;
 
 #[ORM\Entity(repositoryClass: RepostRepository::class)]
-#[ApiResource]
 class Repost
 {
     #[ORM\Id]
@@ -16,11 +14,11 @@ class Repost
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'reposts')]
-    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false)]
-    private ?User $author = null;
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: 'reposts')]
-    #[ORM\JoinColumn(name: 'post_id', referencedColumnName: 'id', nullable: false)]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Post $post = null;
 
     #[ORM\Column]
@@ -36,14 +34,14 @@ class Repost
         return $this->id;
     }
 
-    public function getAuthor(): ?User
+    public function getUser(): ?User
     {
-        return $this->author;
+        return $this->user;
     }
 
-    public function setAuthor(?User $author): static
+    public function setUser(?User $user): static
     {
-        $this->author = $author;
+        $this->user = $user;
         return $this;
     }
 

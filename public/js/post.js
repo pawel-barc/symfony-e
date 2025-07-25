@@ -1,6 +1,48 @@
 // Utilise une Map pour stocker les boutons déjà configurés
 const likeButtonRegistry = new Map();
 
+// repost.js
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.repost-btn').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const postId = button.dataset.postId;
+            const isReposted = button.classList.contains('reposted');
+            const endpoint = isReposted ? `/post/${postId}/unrepost` : `/post/${postId}/repost`;
+
+            button.disabled = true;
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                });
+
+                if (!response.ok) throw new Error('Erreur réseau');
+
+                const data = await response.json();
+
+                if (data.success) {
+                    button.classList.toggle('reposted', !isReposted);
+                    button.querySelector('.repost-count').textContent = data.repostsCount;
+                } else {
+                    console.error('Erreur:', data.message);
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+            } finally {
+                button.disabled = false;
+            }
+        });
+    });
+});
+
 function initializeLikeButtons() {
     document.querySelectorAll('.like-btn').forEach(button => {
         const postId = button.dataset.postId;
@@ -71,3 +113,4 @@ document.addEventListener('DOMContentLoaded', initializeLikeButtons);
 function onNewPostsAdded() {
     initializeLikeButtons();
 }
+

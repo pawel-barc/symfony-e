@@ -5,14 +5,9 @@ namespace App\Entity;
 use App\Repository\PostRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Metadata\ApiResource;
-use App\Entity\User;
-use App\Entity\Comment;
-use App\Entity\PostLike;
-use App\Entity\Repost;
-use App\Entity\PostHashtag;
 
 #[ORM\Entity(repositoryClass: PostRepository::class)]
 #[ApiResource]
@@ -23,7 +18,7 @@ class Post
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $text = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -32,52 +27,37 @@ class Post
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $video = null;
 
-    #[ORM\Column(nullable: true, type: 'json')]
-    #[Assert\All([
-        new Assert\Choice(['choices' => ['public', 'friends', 'private'],
-            'message' => "La valeur {{ value }} n'est pas autorisée. Valeurs autorisées: public, private, friends "])
-    ])]
-    private ?array $visibility = null;
-
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'posts')]
-    #[ORM\JoinColumn(name: 'author_id', referencedColumnName: 'id', nullable: false)]
+    #[ORM\JoinColumn(nullable: false)]
     private ?User $author = null;
 
+    #[ORM\OneToMany(targetEntity: PostLike::class, mappedBy: 'post')]
+    private Collection $postLikes;
 
     /**
      * @var Collection<int, Comment>
      */
-    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'post')]
+    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'post', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $comments;
 
-    /**
-     * @var Collection<int, PostLike>
-     */
-    #[ORM\OneToMany(targetEntity: PostLike::class, mappedBy: 'post', cascade: ['remove'])]
-    private Collection $postLikes;
-
-    /**
-     * @var Collection<int, Repost>
-     */
-    #[ORM\OneToMany(targetEntity: Repost::class, mappedBy: 'post')]
+    #[ORM\OneToMany(mappedBy: 'post', targetEntity: Repost::class, cascade: ['remove'])]
     private Collection $reposts;
 
-    /**
-     * @var Collection<int, PostHashtag>
-     */
-    #[ORM\OneToMany(targetEntity: PostHashtag::class, mappedBy: 'post', orphanRemoval: true)]
-    private Collection $postHashtags;
+
+    public function getReposts(): Collection
+    {
+        return $this->reposts;
+    }
 
     public function __construct()
     {
-        $this->comments = new ArrayCollection();
         $this->postLikes = new ArrayCollection();
-        $this->createdAt = new \DateTimeImmutable();
         $this->reposts = new ArrayCollection();
-        $this->postHashtags = new ArrayCollection();
+        $this->comments = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -93,6 +73,7 @@ class Post
     public function setText(?string $text): static
     {
         $this->text = $text;
+
         return $this;
     }
 
@@ -104,6 +85,7 @@ class Post
     public function setImage(?string $image): static
     {
         $this->image = $image;
+
         return $this;
     }
 
@@ -115,17 +97,7 @@ class Post
     public function setVideo(?string $video): static
     {
         $this->video = $video;
-        return $this;
-    }
 
-    public function getVisibility(): ?array
-    {
-        return $this->visibility;
-    }
-
-    public function setVisibility(?array $visibility): static
-    {
-        $this->visibility = $visibility;
         return $this;
     }
 
@@ -137,6 +109,7 @@ class Post
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
         return $this;
     }
 
@@ -148,6 +121,83 @@ class Post
     public function setAuthor(?User $author): static
     {
         $this->author = $author;
+
+        return $this;
+    }
+
+    public function getRepostedBy(): ?User
+    {
+        if ($this->reposts->count() > 0) {
+            return $this->reposts->first()->getUser();
+        }
+        return null;
+    }
+
+    /**
+     * @return Collection<int, PostLike>
+     */
+    public function getPostLikes(): Collection
+    {
+        return $this->postLikes;
+    }
+
+    public function addPostLike(PostLike $postLike): static
+    {
+        if (!$this->postLikes->contains($postLike)) {
+            $this->postLikes->add($postLike);
+            $postLike->setPost($this);
+        }
+
+        return $this;
+    }
+
+    public function removePostLike(PostLike $postLike): static
+    {
+        if ($this->postLikes->removeElement($postLike)) {
+            // set the owning side to null (unless already changed)
+            if ($postLike->getPost() === $this) {
+                $postLike->setPost(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getOriginalPost(): ?self
+    {
+        return $this->originalPost;
+    }
+
+    public function setOriginalPost(?self $originalPost): static
+    {
+        $this->originalPost = $originalPost;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, self>
+     */
+
+    public function addRepost(self $repost): static
+    {
+        if (!$this->reposts->contains($repost)) {
+            $this->reposts->add($repost);
+            $repost->setOriginalPost($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRepost(self $repost): static
+    {
+        if ($this->reposts->removeElement($repost)) {
+            // set the owning side to null (unless already changed)
+            if ($repost->getOriginalPost() === $this) {
+                $repost->setOriginalPost(null);
+            }
+        }
+
         return $this;
     }
 
@@ -172,6 +222,7 @@ class Post
     public function removeComment(Comment $comment): static
     {
         if ($this->comments->removeElement($comment)) {
+            // set the owning side to null (unless already changed)
             if ($comment->getPost() === $this) {
                 $comment->setPost(null);
             }
@@ -180,77 +231,10 @@ class Post
         return $this;
     }
 
-    /**
-     * @return Collection<int, PostLike>
-     */
-    public function getPostLikes(): Collection
+    public function isLikedByUser(User $user): bool
     {
-        return $this->postLikes;
-    }
-
-    public function addPostLike(PostLike $postLike): static
-    {
-        if (!$this->postLikes->contains($postLike)) {
-            $this->postLikes->add($postLike);
-            $postLike->setPost($this);
-        }
-
-        return $this;
-    }
-
-    public function removePostLike(PostLike $postLike): static
-    {
-        if ($this->postLikes->removeElement($postLike)) {
-            if ($postLike->getPost() === $this) {
-                $postLike->setPost(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Repost>
-     */
-    public function getReposts(): Collection
-    {
-        return $this->reposts;
-    }
-
-    public function addRepost(Repost $repost): static
-    {
-        if (!$this->reposts->contains($repost)) {
-            $this->reposts->add($repost);
-            $repost->setPost($this);
-        }
-
-        return $this;
-    }
-
-    public function removeRepost(Repost $repost): static
-    {
-        if ($this->reposts->removeElement($repost)) {
-            if ($repost->getPost() === $this) {
-                $repost->setPost(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function getRepostsCount(): int
-    {
-        return $this->reposts->count();
-    }
-
-    public function isRepostedByUser(?User $user): bool
-    {
-        if (!$user) {
-            return false;
-        }
-
-        foreach ($this->reposts as $repost) {
-            if ($repost->getAuthor() === $user) {
+        foreach ($this->postLikes as $like) {
+            if ($like->getAuthor() === $user) {
                 return true;
             }
         }
@@ -258,32 +242,25 @@ class Post
         return false;
     }
 
-    /**
-     * @return Collection<int, PostHashtag>
-     */
-    public function getPostHashtags(): Collection
-    {
-        return $this->postHashtags;
-    }
 
-    public function addPostHashtag(PostHashtag $postHashtag): static
-    {
-        if (!$this->postHashtags->contains($postHashtag)) {
-            $this->postHashtags->add($postHashtag);
-            $postHashtag->setPost($this);
-        }
 
-        return $this;
-    }
 
-    public function removePostHashtag(PostHashtag $postHashtag): static
+    public function isRepostedByUser(User $user): bool
     {
-        if ($this->postHashtags->removeElement($postHashtag)) {
-            if ($postHashtag->getPost() === $this) {
-                $postHashtag->setPost(null);
+        foreach ($this->reposts as $repost) {
+            if ($repost->getUser() === $user) {
+                return true;
             }
         }
 
-        return $this;
+        return false;
     }
+
+
+
+    public function getRepostsCount(): int
+    {
+        return $this->reposts->count();
+    }
+
 }

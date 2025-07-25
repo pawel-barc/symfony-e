@@ -3,6 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Post;
+use App\Entity\Comment;
+use App\Form\CommentType;
+use App\Form\PostType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -88,7 +91,7 @@ class PostController extends AbstractController
             }
 
             if ($request->isXmlHttpRequest()) {
-                // Retourne les infos du post pour que le JS puisse l’afficher direct
+                // Retourne les infos du post pour que le JS puisse l'afficher direct
                 return new JsonResponse([
                     'success' => true,
                     'post' => [
@@ -106,18 +109,107 @@ class PostController extends AbstractController
             return $this->redirectToRoute('app_post');
         }
 
-        $posts = $em->getRepository(Post::class)->findBy([], ['createdAt' => 'DESC']);
+
+
+        $posts = $em->getRepository(Post::class)->findAllPostsAndReposts();
+
+        // Préparer les formulaires de commentaire pour chaque post
+        $commentForms = [];
+        foreach ($posts as $post) {
+            $comment = new Comment();
+            $comment->setPost($post);
+            $commentForms[$post->getId()] = $this->createForm(CommentType::class, $comment)->createView();
+        }
+
 
         return $this->render('post/index.html.twig', [
             'posts' => $posts,
+            'comment_forms' => $commentForms,
         ]);
     }
 
     #[Route('/post/{id}', name: 'post_show', methods: ['GET'])]
     public function show(Post $post): Response
     {
+        $commentForm = $this->createForm(CommentType::class, new Comment());
+        $commentForms = [$post->getId() => $commentForm->createView()];
+
         return $this->render('post/_post_details.html.twig', [
             'post' => $post,
+            'comment_forms' => $commentForms,
+        ]);
+    }
+
+    #[Route('/post/{id}/comment', name: 'post_add_comment', methods: ['POST'])]
+    public function addComment(Post $post, Request $request, EntityManagerInterface $em): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $comment = new Comment();
+        $form = $this->createForm(CommentType::class, $comment);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $comment->setAuthor($this->getUser());
+            $comment->setPost($post);
+            $comment->setCreatedAt(new \DateTimeImmutable());
+
+            $em->persist($comment);
+            $em->flush();
+
+            if ($request->isXmlHttpRequest()) {
+                return $this->json([
+                    'success' => true,
+                    'comment' => [
+                        'id' => $comment->getId(),
+                        'text' => $comment->getText(),
+                        'author' => $comment->getAuthor()->getUsername(),
+                        'createdAt' => $comment->getCreatedAt()->format('d/m/Y H:i'),
+                    ],
+                    'commentsCount' => $post->getComments()->count()
+                ]);
+            }
+
+            return $this->redirectToRoute('post_show', ['id' => $post->getId()]);
+        }
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->json(['success' => false, 'errors' => (string) $form->getErrors(true, false)], 400);
+        }
+
+        return $this->redirectToRoute('post_show', ['id' => $post->getId()]);
+    }
+
+    #[Route('/post/{id}/like', name: 'post_like', methods: ['POST'])]
+    public function likePost(Post $post, Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $user = $this->getUser();
+        $alreadyLiked = $post->isLikedByUser($user);
+
+        if ($alreadyLiked) {
+            // Retirer le like
+            foreach ($post->getPostLikes() as $like) {
+                if ($like->getAuthor() === $user) {
+                    $em->remove($like);
+                }
+            }
+        } else {
+            // Ajouter un like
+            $like = new PostLike();
+            $like->setPost($post);
+            $like->setAuthor($user);
+            $like->setCreatedAt(new \DateTimeImmutable());
+            $em->persist($like);
+        }
+
+        $em->flush();
+
+        return $this->json([
+            'success' => true,
+            'liked' => !$alreadyLiked,
+            'count' => $post->getPostLikes()->count()
         ]);
     }
 
@@ -131,7 +223,7 @@ class PostController extends AbstractController
             'video' => $post->getVideo(),
             'author' => $post->getAuthor()->getUsername(),
             'createdAt' => $post->getCreatedAt()->format('d/m/Y H:i'),
-            // Ajoutez d'autres champs si nécessaire
+            'commentsCount' => $post->getComments()->count(),
         ]);
     }
 }

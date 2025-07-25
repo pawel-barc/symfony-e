@@ -16,6 +16,18 @@ class PostRepository extends ServiceEntityRepository
         parent::__construct($registry, Post::class);
     }
 
+    // Dans PostRepository.php
+    public function findAllPostsAndReposts()
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->leftJoin('p.reposts', 'r')
+            ->addSelect('r')
+            ->orderBy('COALESCE(r.createdAt, p.createdAt)', 'DESC')
+            ->getQuery();
+
+        return $qb->getResult();
+    }
+
     //    /**
     //     * @return Post[] Returns an array of Post objects
     //     */

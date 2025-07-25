@@ -1,50 +1,105 @@
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('css/post.css') }}">
+    <style>
+        .username-link {
+            text-decoration: none;
+            color: inherit;
+        }
+        .username-link:hover {
+            text-decoration: underline;
+        }
+    </style>
 {% endblock %}
 
-<article class="tweet" data-post-id="{{ post.id }}">
-    <header class="tweet-header">
-        <img class="avatar" src="{% if post.author and post.author.profileImage %}
-            {{ asset('uploads/profile_images/' ~ post.author.profileImage) }}
-        {% else %}
-            {{ asset('uploads/profile_images/default-profile.png') }}
-        {% endif %}" alt="Photo de {{ post.author.username }}">
-
-        <div class="user-info">
-            <strong>{{ post.author.username }}</strong>
-            <span class="timestamp">· {{ post.createdAt|date('d M Y H:i') }}</span>
-            {% if post.originalPost is defined and post.originalPost is not null %}
-                <small class="repost-notice">🔁 a reposté {{ post.originalPost.author.username }}</small>
-            {% endif %}
+<article class="tweet {% if post.reposts.count > 0 %}repost-container{% endif %}" data-post-id="{{ post.id }}" onclick="goToPost({{ post.id }})" style="cursor:pointer;">
+    {% if post.reposts.count > 0 %}
+        <div class="repost-header">
+            <span class="repost-icon">
+                <img src="/icons/repost.svg">
+            </span>
+            <span class="repost-notice">
+                <a href="{{ path('app_user_profile', {username: post.reposts.first().user.username}) }}" class="username-link" onclick="event.stopPropagation()">
+                    {{ post.reposts.first().user.username }}
+                </a> a reposté
+            </span>
+            <span class="timestamp">· {{ post.reposts.first().createdAt|date('d M Y H:i') }}</span>
         </div>
-    </header>
-
-    <p class="tweet-text">{{ post.text }}</p>
-
-    {% if post.image %}
-        <figure class="tweet-media">
-            <img src="{{ asset(post.image) }}" alt="">
-        </figure>
-    {% elseif post.video %}
-        <figure class="tweet-media">
-            <video controls>
-                <source src="{{ asset(post.video) }}" type="video/mp4">
-            </video>
-        </figure>
     {% endif %}
 
-    <footer class="tweet-footer">
-        <button class="action-btn repost-btn {{ post.isRepostedByUser(app.user) ? 'reposted' : '' }}"
-                data-post-id="{{ post.id }}">
-            🔁 <span class="repost-count">{{ post.reposts.count }}</span>
-        </button>
+    <div class="{% if post.reposts.count > 0 %}repost-content{% endif %}">
+        <header class="tweet-header">
+            <img class="avatar" src="
+            {% if post.author and post.author.profileImage %}
+                {{ asset('uploads/profile_images/' ~ post.author.profileImage) }}
+            {% else %}
+                {{ asset('uploads/profile_images/default-profile.png') }}
+            {% endif %}" alt="Photo de profil">
 
-        <button class="action-btn like-btn {% if app.user and post.postLikes|filter(like => like.author.id == app.user.id)|length > 0 %}liked{% endif %}"
-                data-post-id="{{ post.id }}"
-                data-likes-count="{{ post.postLikes|length }}">
-            ❤️ <span class="like-count">{{ post.postLikes|length }}</span>
-        </button>
+            <div class="user-info">
+                <a href="{{ path('app_user_profile', {username: post.author.username}) }}" class="username-link" onclick="event.stopPropagation()">
+                    <strong>{{ post.author.username }}</strong>
+                </a>
+                <span class="timestamp">· {{ post.createdAt|date('d M Y H:i') }}</span>
+            </div>
+        </header>
 
-        <a class="action-btn" href="{{ path('post_show', { id: post.id }) }}">📄 Voir le post</a>
-    </footer>
+        <!-- Le reste du code reste inchangé -->
+        <p class="tweet-text">{{ post.text }}</p>
+
+        {% if post.image %}
+            <figure class="tweet-media">
+                <img src="{{ asset(post.image) }}" alt="">
+            </figure>
+        {% elseif post.video %}
+            <figure class="tweet-media">
+                <video controls>
+                    <source src="{{ asset(post.video) }}" type="video/mp4">
+                </video>
+            </figure>
+        {% endif %}
+
+        <footer class="tweet-footer">
+            <button class="action-btn comment-btn" data-post-id="{{ post.id }}" onclick="event.stopPropagation(); toggleCommentForm({{ post.id }})">
+                <img src="{{ asset('icons/comment.svg') }}" class="comment-icon"/>
+                <span class="comment-count">{{ post.comments|length }}</span>
+            </button>
+            <button class="action-btn repost-btn {{ post.isRepostedByUser(app.user) ? 'reposted' : '' }}"
+                    data-post-id="{{ post.id }}"
+                    onclick="event.stopPropagation(); handleRepost(this, {{ post.id }})">
+                <img src="{{ asset('icons/repost.svg') }}" class="repost-icon"/>
+                <span class="repost-count">{{ post.reposts.count }}</span>
+            </button>
+            <button class="action-btn like-btn {% if app.user and post.postLikes|filter(like => like.author.id == app.user.id)|length > 0 %}liked{% endif %}"
+                    data-post-id="{{ post.id }}"
+                    data-likes-count="{{ post.postLikes|length }}"
+                    onclick="event.stopPropagation()">
+                <img src="{{ asset('icons/like.svg') }}" class="like-icon"/>
+                <span class="like-count">{{ post.postLikes|length }}</span>
+            </button>
+
+            <div class="comment-form-container" id="comment-form-{{ post.id }}" style="display: none;">
+                {% if comment_forms[post.id] is defined %}
+                    {{ include('comment/_form.html.twig', {form: comment_forms[post.id]}) }}
+                {% endif %}
+            </div>
+        </footer>
+    </div>
 </article>
+
+<script>
+    function goToPost(postId) {
+        window.location.href = '/post/' + postId;
+    }
+
+    function toggleCommentForm(postId) {
+        const formContainer = document.getElementById(`comment-form-${postId}`);
+        if (!formContainer) return;
+
+        const currentDisplay = window.getComputedStyle(formContainer).display;
+        formContainer.style.display = (currentDisplay === 'none') ? 'block' : 'none';
+
+        if (formContainer.style.display === 'block') {
+            formContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+</script>
