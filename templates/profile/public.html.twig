@@ -22,8 +22,12 @@
         <p>{{ user.bio }}</p>
         <p>Inscrit le {{ user.createdAt|date('d/m/Y') }}</p>
         <p>
-            <strong>{{ user.getFollows|length }}</strong> abonnements                        
-            <strong>{{ user.getFollowers|length }}</strong> abonnés
+            <a href="{{ path('user_following', { username:  user.username }) }}">
+                <strong>{{ user.getFollows()|length }}</strong> abonnements
+            </a>
+            <a href="{{ path('user_followers', { username:  user.username }) }}">                            
+                <strong>{{ user.getFollowers()|length }}</strong> abonnés
+            </a>    
         </p>
         <hr>
         {# Affichage des publications avec le format approprié #}    

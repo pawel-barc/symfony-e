@@ -10,9 +10,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-// Cette classe gère l'ajout des abonnements ainsi que les actions suivre/désabonner via JSON
+// Cette classe gère les abonnements(suivre/désabonner) ainsi que l'affichage' des abonnées et abonnements d'un utilisateur
 final class FollowController extends AbstractController
 {
     // Route pour suivre un utilisateur via JSON.
@@ -124,5 +125,39 @@ final class FollowController extends AbstractController
         ]);
     }
 
+    // Cette fonction affiche la liste des abonnés d'un utilisateur
+    #[Route('/{username}/followers', name: 'user_followers', methods: ["GET"])]
+    public function followers( string $username, UserRepository $userRepo): Response
+    {
+        $user = $userRepo->findOneBy([
+            'username' => $username,
+        ]);
+
+        if (!$user) {
+            throw $this->createNotFoundException("Utilisateur introuvable");
+        }
+        return $this->render('follow/follow_list.html.twig', [
+            'user' => $user,
+            'type' => 'followers'
+        ]);
+    }
+
+
+    // Cette fonction affiche la liste des abonnements d'un utilisateur
+    #[Route('/{username}/following', name: 'user_following', methods: ["GET"])]
+    public function following( string $username, UserRepository $userRepo): Response
+    {
+        $user = $userRepo->findOneBy([
+            'username' => $username,
+        ]);
+
+        if (!$user) {
+            throw $this->createNotFoundException("Utilisateur introuvable");
+        }
+        return $this->render('follow/follow_list.html.twig', [
+            'user' => $user,
+            'type' => 'following'
+        ]);
+    }
 
 }

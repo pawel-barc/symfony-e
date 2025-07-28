@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{# Titre de la page en fonction du type : abonnés ou abonnements #}
+{% block title %}
+    {% if type == 'followers' %}
+        Abonnés de {{ user.username }}
+    {% else %}
+        Abonnements de {{user.username }}
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+{# Titre principal en fonction du type #}
+    <h2>
+        {% if type == 'followers' %}
+            Abonnés de {{ user.firstname}} {{ user.lastname }}
+        {% else %}
+            Abonnements de {{ user.firstname}} {{ user.lastname}}
+        {% endif %}
+    </h2>
+    
+    <ul>
+        {# Séléction de la bonne liste d'utilisateurs : followers ou followings #}
+        {% if type == 'followers' %}
+            {% set userList = user.getFollowers() %}
+        {% else %}
+            {% set userList = user.getFollows() %}
+        {% endif %}
+        
+        {# Message si aucun utilisateur dans la liste #}
+        {% if userList is empty %}
+            <p>Aucun utilisateur trouvé</p>
+        {% else %}
+        {# Détermination de l'utilisateur à afficher selon le type #}
+            {% for follow in userList%}
+                {% if type == 'followers' %}
+                    {% set u = follow.getFollower() %}
+                {% else %}
+                    {% set u = follow.getFollowed() %}
+                {% endif %}
+
+                <li>
+                    {# Affichage de la photo de profil si disponible et d'informations principales d'utilisateurs #}
+                    {% if u.profileImage %}
+                        <img src="{{asset('uploads/profile_images/' ~ u.profileImage)}}" alt="Photo de profil de {{u.username}}">
+                    {% endif %}    
+                    <strong>{{u.firstname}} {{u.lastname}}</strong> - @{{u.username}} <br>
+                    <small>{{u.bio}}</small><br>
+                    {% if app.user and app.user != u %}
+                        {% set isFollowing = u.isFollowedBy(app.user) %}
+                        {% set followback = app.user.isFollowedBy(u) %}
+                        {# Bouton de Suivi si ce n'est pas soi-même #}
+                        <button class="follow-btn" data-username="{{ u.username }}" data-following="{{ isFollowing ? '1' : '0' }}">
+                            {{ isFollowing ? (followback ? '↔ Suivi' : 'Suivi') : 'Suivre' }}
+                        </button>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        {% endif %}
+    </ul>                                
+<script src="{{ asset('js/follow.js') }}"></script>
+{% endblock %}            
