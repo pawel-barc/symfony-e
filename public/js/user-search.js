@@ -1,11 +1,21 @@
-// Attend que le DOM soit complètement chargé avant d'exécuter le code
-document.addEventListener("DOMContentLoaded", function () {
+// Cette fonctione initialise la fonctionalité de recherche d'utilisateur dès que les éléments HTML sont disponible
+function initializeSearch() {
     const searchInput = document.getElementById("search-input");
     const resultsContainer = document.getElementById("search-results");
 
+    // Si les éléments ne sont pas encore dans le DOM, réesaye dans un moment
+    if (!searchInput || !resultsContainer) {
+        setTimeout(initializeSearch, 100);
+        return;
+    }
+
+    // Empêche l'initialisation multiple.
+    if (searchInput.dataset.initialized) return;
+    searchInput.dataset.initialized = "true";
+
     // Écoute les changements dans le champ de recherche
     searchInput.addEventListener("input", async function () {
-        const query = this.value;
+        const query = this.value.trim();
 
         // Si la recherche contient moins de deux caractères, on efface les résultats et on arrête
         if (query.length < 2) {
@@ -21,10 +31,12 @@ document.addEventListener("DOMContentLoaded", function () {
             const users = await response.json();
 
             // Si des utilisateurs sont trouvés, on génère dynamiquement le HTML pour les afficher
-            if (users.length > 0) {
-                resultsContainer.innerHTML = users
-                    .map((user) => {
-                        return `
+
+            resultsContainer.innerHTML =
+                users.length > 0
+                    ? users
+                          .map(
+                              (user) => `
                         <div>
                             <a href="/user/${user.username}">
                                 <strong>
@@ -33,30 +45,28 @@ document.addEventListener("DOMContentLoaded", function () {
                                 (${user.username})
                             </a>
                         </div>
-                        `;
-                    })
-                    .join(""); // Combine tous les éléments en une seule chaîne HTML
-            } else {
-                resultsContainer.innerHTML =
-                    "<div>Aucun utilisateur trouvé</div>";
-            }
+                        `
+                          )
+                          .join("")
+                    : "<div>Aucun utilisateur trouvé</div>";
         } catch (error) {
-            // On affiche l'erreur dans le console
+            // On affiche l'erreur dans le console et informe l'utilisateur
             console.error("Erreur AJAX", error);
+            resultsContainer.innerHTML = "<div>Erreur de recherche</div>";
         }
     });
 
-    // Réinitialise le champ de recherche au chargement initial.
+    // Réinitialise le champ de recherche et les résultats au chargement
     searchInput.value = "";
     resultsContainer.innerHTML = "";
+}
 
-    // Aussi, écoute le changement de visibilité
-    window.addEventListener("visibilitychange", function () {
-        if (document.visibilityState === "visible") {
-            if (searchInput && resultsContainer) {
-                searchInput.value = "";
-                resultsContainer.innerHTML = "";
-            }
-        }
-    });
+// Lance l'initialisation à différents moments de chargement de la page
+document.addEventListener("DOMContentLoaded", initializeSearch);
+window.addEventListener("load", initializeSearch);
+window.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") initializeSearch();
 });
+
+// Lance aussi après 0.5 sec
+setTimeout(initializeSearch, 500);

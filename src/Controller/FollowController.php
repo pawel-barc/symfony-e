@@ -5,26 +5,38 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\Follow;
 use App\Repository\FollowRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
-// Cette classe gère l'ajout des abonnements ainsi que l'accès aux listes abonnés et d'abonnements.
+// Cette classe gère l'ajout des abonnements ainsi que les actions suivre/désabonner via JSON
 final class FollowController extends AbstractController
 {
-    // Route pour suivre un utilisateur.
-    #[Route('/follow/{id}', name: 'user_follow', methods: ['POST'])]
-    // Cette fonction permet à un utilisateur 
-    public function follow(User $userToFollow, FollowRepository $followRepo, EntityManagerInterface $em): RedirectResponse
+    // Route pour suivre un utilisateur via JSON.
+    #[Route('/api/follow/{username}', name: 'api_user_follow', methods: ['POST'])]
+    // Cette fonction permet à un utilisateur de s'abonner à un autre utilisateur
+    public function follow(string $username, FollowRepository $followRepo, EntityManagerInterface $em, UserRepository $userRepository): JsonResponse
     {
         $currentUser = $this->getUser();
 
+        $userToFollow = $userRepository->findOneBy(['username' => $username]);
+
+        if(!$userToFollow) {
+            return $this->json([
+                "success" => false,
+                "message" => "Utilisateur introuvable"
+            ], 404);
+        }
+
         // L'utilisateur doit être connecté et ne peut pas s'abonner à lui même.
         if (!$currentUser || $currentUser === $userToFollow) {
-            $this->addFlash("error", "Impossible de suivre cet utilisateur");
-            return $this->redirectToRoute('user_profile', ['username' => $userToFollow->getUsername()]);
+            return $this->json([
+                "success" => false,
+                "message" => "Impossible de suivre cet utilisateur"
+            ], 400);
         }
 
         // Vérifie si l'abonnement existe déjà
@@ -32,6 +44,11 @@ final class FollowController extends AbstractController
             'follower' => $currentUser,
             'followed' => $userToFollow
         ]);
+
+        $followback = $followRepo->findOneBy([
+            'follower' => $userToFollow,
+            'followed' => $currentUser,
+        ]) !== null;
 
         // Si ce n'est pas le cas, crée un nouvel abonnement 
         if (!$existingFollow) {
@@ -42,11 +59,70 @@ final class FollowController extends AbstractController
             $em->flush();
         }
 
-        // Redirige vers le profil public de l'utilisateur suivi.
-        return $this->redirectToRoute('user_profile', [
-            'username' => $userToFollow->getUsername()
+        // Retourne une réponse JSON avec succès
+        return $this->json([
+            "success" => true,
+            "following" => true,
+            "followback" => $followback,
+            // "userId" => $userToFollow->getId(),
+            "username" => $userToFollow->getUsername(),
         ]);
     }
 
-    
+    // Route pour se désabonner d'un utilisateur via JSON.
+    #[Route('/api/unfollow/{username}', name: 'api_user_unfollow', methods: ["DELETE"])]
+
+    // Cette fonction permet à un utilisateur de se désabonner d'un autre utilisateur
+    public function unfollow(string $username, EntityManagerInterface $em, FollowRepository $followRepo, UserRepository $userRepository ) :JsonResponse
+    {
+        $currentUser = $this->getUser();
+
+        $userToUnfollow = $userRepository->findOneBy([
+            "username" => $username
+        ]);
+
+        if (!$userToUnfollow) {
+            return $this->json([
+                "success" => false,
+                "message" => "Utilisateur introuvable"
+            ], 404);
+        }
+
+        // L'utilisateur doit être connecté et ne peut pas se désabonner de lui même.
+        if (!$currentUser || $currentUser === $userToUnfollow) {
+            return $this->json([
+                "success" => false,
+                "message" => "Impossible de se désabonner de cet utilisateur"
+            ], 400);
+        }
+
+        // Vérifie si l'abonnement existe déjà
+        $existingFollow = $followRepo->findOneBy([
+            'follower' => $currentUser,
+            'followed' => $userToUnfollow,
+        ]);
+
+         $followback = $followRepo->findOneBy([
+            'follower' => $userToUnfollow,
+            'followed' => $currentUser,
+        ]) !== null;
+
+
+        // Si c'est le cas, supprime l'abonnement
+        if ($existingFollow) {
+            $em->remove($existingFollow);
+            $em->flush();
+        }
+
+        // Retourne une réponse JSON avec succès
+        return $this->json([
+            "success" => true,
+            "following" => false,
+            "followback" => $followback,
+            // "userId" => $userToUnfollow->getId(),
+            "username" => $userToUnfollow->getUsername()
+        ]);
+    }
+
+
 }

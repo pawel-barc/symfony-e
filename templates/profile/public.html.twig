@@ -10,7 +10,13 @@
         {% if user.profileImage %}
             <img src="{{ asset('uploads/profile_images/' ~ user.profileImage) }}" alt="Photo de profil de {{user.username}}"><br>
         {% endif %}
-        <button>Suivre</button><br>
+        {% if app.user and app.user != user %}
+            {% set isFollowing = user.isFollowedBy(app.user) %}
+            {% set followback = app.user.isFollowedBy(user) %}
+            <button class="follow-btn" 
+                data-username="{{ user.username }}" data-following="{{ isFollowing ? '1' : '0'}}">{{ isFollowing ? (followback ? '↔ Suivi' : 'Suivi') : 'Suivre'}}
+            </button><br>
+        {% endif %}
         <h2>{{ user.firstname}} {{ user.lastname }}</h2>
         <p>{{ user.username}}</p>
         <p>{{ user.bio }}</p>
@@ -36,11 +42,12 @@
                     <video controls>
                         <source src="{{asset('uploads/' ~ post.video) }}" type="video/mp4">
                     </video>
-                {% endif %}}    
+                {% endif %}    
                 <small>{{ post.createdAt|date('d/m/Y H:i') }}</small>
             </div>
         {% else %}
             <p>Aucun post pour le moment</p>
         {% endfor %}
     </div>
+<script src="{{ asset('js/follow.js') }}"></script>
 {% endblock %}        

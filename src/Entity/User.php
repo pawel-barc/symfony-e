@@ -512,6 +512,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function isFollowedBy(User $otherUser): bool
+    {
+        foreach ($this->followers as $follow) {
+            if ($follow->getFollower()?->getId() === $otherUser->getId()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function isFollowing(User $otherUser): bool
+    {
+        foreach ($this->follows as $follow) {
+            if ($follow->getFollowed()?->getId() === $otherUser->getId()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @return Collection<int, Notification>
      */
