@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250722142811 extends AbstractMigration
+final class Version20250729155659 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -45,24 +45,28 @@ final class Version20250722142811 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_BF5476CACD53EDB6 ON notification (receiver_id)');
         $this->addSql('CREATE INDEX IDX_BF5476CAF624B39D ON notification (sender_id)');
         $this->addSql('COMMENT ON COLUMN notification.created_at IS \'(DC2Type:datetime_immutable)\'');
-        $this->addSql('CREATE TABLE post (id SERIAL NOT NULL, author_id INT NOT NULL, text VARCHAR(255) DEFAULT NULL, image VARCHAR(255) DEFAULT NULL, video VARCHAR(255) DEFAULT NULL, visibility JSON DEFAULT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE post (id SERIAL NOT NULL, author_id INT NOT NULL, text TEXT DEFAULT NULL, image VARCHAR(255) DEFAULT NULL, video VARCHAR(255) DEFAULT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_5A8A6C8DF675F31B ON post (author_id)');
         $this->addSql('COMMENT ON COLUMN post.created_at IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('CREATE TABLE post_hashtag (id SERIAL NOT NULL, post_id INT NOT NULL, hashtag_id INT NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_675D9D524B89032C ON post_hashtag (post_id)');
         $this->addSql('CREATE INDEX IDX_675D9D52FB34EF56 ON post_hashtag (hashtag_id)');
-        $this->addSql('CREATE TABLE post_like (id SERIAL NOT NULL, author_id INT NOT NULL, post_id INT NOT NULL, PRIMARY KEY(id))');
-        $this->addSql('CREATE INDEX IDX_653627B8F675F31B ON post_like (author_id)');
+        $this->addSql('CREATE TABLE post_like (id SERIAL NOT NULL, post_id INT NOT NULL, author_id INT NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_653627B84B89032C ON post_like (post_id)');
+        $this->addSql('CREATE INDEX IDX_653627B8F675F31B ON post_like (author_id)');
         $this->addSql('CREATE TABLE private_message (id SERIAL NOT NULL, author_id INT NOT NULL, chat_id INT NOT NULL, text TEXT DEFAULT NULL, image VARCHAR(255) DEFAULT NULL, video VARCHAR(255) DEFAULT NULL, reactions JSON DEFAULT NULL, sending_date_time TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, is_read BOOLEAN NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_4744FC9BF675F31B ON private_message (author_id)');
         $this->addSql('CREATE INDEX IDX_4744FC9B1A9A7125 ON private_message (chat_id)');
         $this->addSql('COMMENT ON COLUMN private_message.sending_date_time IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('COMMENT ON COLUMN private_message.created_at IS \'(DC2Type:datetime_immutable)\'');
-        $this->addSql('CREATE TABLE repost (id SERIAL NOT NULL, author_id INT NOT NULL, post_id INT NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
-        $this->addSql('CREATE INDEX IDX_DD3446C5F675F31B ON repost (author_id)');
+        $this->addSql('CREATE TABLE repost (id SERIAL NOT NULL, user_id INT NOT NULL, post_id INT NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE INDEX IDX_DD3446C5A76ED395 ON repost (user_id)');
         $this->addSql('CREATE INDEX IDX_DD3446C54B89032C ON repost (post_id)');
         $this->addSql('COMMENT ON COLUMN repost.created_at IS \'(DC2Type:datetime_immutable)\'');
+        $this->addSql('CREATE TABLE "user" (id SERIAL NOT NULL, firstname VARCHAR(50) NOT NULL, lastname VARCHAR(50) NOT NULL, username VARCHAR(50) NOT NULL, email VARCHAR(180) NOT NULL, password VARCHAR(255) NOT NULL, profile_image VARCHAR(255) DEFAULT NULL, bio TEXT DEFAULT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, roles JSON NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE UNIQUE INDEX UNIQ_8D93D649F85E0677 ON "user" (username)');
+        $this->addSql('CREATE UNIQUE INDEX UNIQ_8D93D649E7927C74 ON "user" (email)');
+        $this->addSql('COMMENT ON COLUMN "user".created_at IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('CREATE TABLE user_hashtag_like (id SERIAL NOT NULL, author_id INT NOT NULL, hashtag_id INT NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_9996D428F675F31B ON user_hashtag_like (author_id)');
         $this->addSql('CREATE INDEX IDX_9996D428FB34EF56 ON user_hashtag_like (hashtag_id)');
@@ -96,15 +100,14 @@ final class Version20250722142811 extends AbstractMigration
         $this->addSql('ALTER TABLE post ADD CONSTRAINT FK_5A8A6C8DF675F31B FOREIGN KEY (author_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE post_hashtag ADD CONSTRAINT FK_675D9D524B89032C FOREIGN KEY (post_id) REFERENCES post (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE post_hashtag ADD CONSTRAINT FK_675D9D52FB34EF56 FOREIGN KEY (hashtag_id) REFERENCES hashtag (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
-        $this->addSql('ALTER TABLE post_like ADD CONSTRAINT FK_653627B8F675F31B FOREIGN KEY (author_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
-        $this->addSql('ALTER TABLE post_like ADD CONSTRAINT FK_653627B84B89032C FOREIGN KEY (post_id) REFERENCES post (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
+        $this->addSql('ALTER TABLE post_like ADD CONSTRAINT FK_653627B84B89032C FOREIGN KEY (post_id) REFERENCES post (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE');
+        $this->addSql('ALTER TABLE post_like ADD CONSTRAINT FK_653627B8F675F31B FOREIGN KEY (author_id) REFERENCES "user" (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE private_message ADD CONSTRAINT FK_4744FC9BF675F31B FOREIGN KEY (author_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE private_message ADD CONSTRAINT FK_4744FC9B1A9A7125 FOREIGN KEY (chat_id) REFERENCES chat (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
-        $this->addSql('ALTER TABLE repost ADD CONSTRAINT FK_DD3446C5F675F31B FOREIGN KEY (author_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
+        $this->addSql('ALTER TABLE repost ADD CONSTRAINT FK_DD3446C5A76ED395 FOREIGN KEY (user_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE repost ADD CONSTRAINT FK_DD3446C54B89032C FOREIGN KEY (post_id) REFERENCES post (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE user_hashtag_like ADD CONSTRAINT FK_9996D428F675F31B FOREIGN KEY (author_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE user_hashtag_like ADD CONSTRAINT FK_9996D428FB34EF56 FOREIGN KEY (hashtag_id) REFERENCES hashtag (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
-        $this->addSql('CREATE UNIQUE INDEX UNIQ_8D93D649F85E0677 ON "user" (username)');
     }
 
     public function down(Schema $schema): void
@@ -125,11 +128,11 @@ final class Version20250722142811 extends AbstractMigration
         $this->addSql('ALTER TABLE post DROP CONSTRAINT FK_5A8A6C8DF675F31B');
         $this->addSql('ALTER TABLE post_hashtag DROP CONSTRAINT FK_675D9D524B89032C');
         $this->addSql('ALTER TABLE post_hashtag DROP CONSTRAINT FK_675D9D52FB34EF56');
-        $this->addSql('ALTER TABLE post_like DROP CONSTRAINT FK_653627B8F675F31B');
         $this->addSql('ALTER TABLE post_like DROP CONSTRAINT FK_653627B84B89032C');
+        $this->addSql('ALTER TABLE post_like DROP CONSTRAINT FK_653627B8F675F31B');
         $this->addSql('ALTER TABLE private_message DROP CONSTRAINT FK_4744FC9BF675F31B');
         $this->addSql('ALTER TABLE private_message DROP CONSTRAINT FK_4744FC9B1A9A7125');
-        $this->addSql('ALTER TABLE repost DROP CONSTRAINT FK_DD3446C5F675F31B');
+        $this->addSql('ALTER TABLE repost DROP CONSTRAINT FK_DD3446C5A76ED395');
         $this->addSql('ALTER TABLE repost DROP CONSTRAINT FK_DD3446C54B89032C');
         $this->addSql('ALTER TABLE user_hashtag_like DROP CONSTRAINT FK_9996D428F675F31B');
         $this->addSql('ALTER TABLE user_hashtag_like DROP CONSTRAINT FK_9996D428FB34EF56');
@@ -145,8 +148,8 @@ final class Version20250722142811 extends AbstractMigration
         $this->addSql('DROP TABLE post_like');
         $this->addSql('DROP TABLE private_message');
         $this->addSql('DROP TABLE repost');
+        $this->addSql('DROP TABLE "user"');
         $this->addSql('DROP TABLE user_hashtag_like');
         $this->addSql('DROP TABLE messenger_messages');
-        $this->addSql('DROP INDEX UNIQ_8D93D649F85E0677');
     }
 }
