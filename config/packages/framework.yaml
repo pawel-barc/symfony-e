@@ -15,4 +15,4 @@ when@test:
             storage_factory_id: session.storage.factory.mock_file
 
 parameters:
-    profile_image_directory: "%kernel.project_dir%/public/uploads/profile_images"
+    profile_images_directory: "%kernel.project_dir%/public/uploads/profile_images"

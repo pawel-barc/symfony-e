@@ -2,10 +2,16 @@
     <link rel="stylesheet" href="{{ asset('css/sidebar.css') }}">
 {% endblock %}
 
-<div class="sidebar">
-    <div class="search-bar">
-        <input type="text" placeholder="Rechercher..." />
+<div class="feed-sidebar">
+            <div class="search-bar">
+                <form method="get" action="{{ path('ajax_user_search') }}" onSubmit="return false;">
+                    <input type="text" name="q" placeholder="Rechercher un utilisateur" id="search-input" autocomplete="off" />
+                    <button type="submit">🔍</button>
+                </form>
+                <div class="autocomplete-results" id="search-results"></div>
+            </div>
+            <div class="trending">Tendances</div>
+            <div class="suggestions">Amis suggérés</div>
+        </div>
     </div>
-    <div class="trending">Tendances</div>
-    <div class="suggestions">Amis suggérés</div>
-</div>
+    <script src="{{ asset('js/user-search.js') }}"></script>
