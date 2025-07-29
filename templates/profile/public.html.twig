@@ -3,44 +3,48 @@
 {% block title %} Profil de {{ user.username }} {% endblock %}
 
 {% block body %}
-{# Affichage des données personnelles de l'utilisateur, y compris ces publications et abonnements #}
-    <div>
-        <h2>{{ user.firstname }} {{ user.lastname }}</h2>
-        <p>{{ user.getPosts|length }} posts</p>
-        {% if user.profileImage %}
-            <img src="{{ asset('uploads/profile_images/' ~ user.profileImage) }}" alt="Photo de profil de {{user.username}}"><br>
-        {% endif %}
-        <button>Suivre</button><br>
-        <h2>{{ user.firstname}} {{ user.lastname }}</h2>
-        <p>{{ user.username}}</p>
-        <p>{{ user.bio }}</p>
-        <p>Inscrit le {{ user.createdAt|date('d/m/Y') }}</p>
-        <p>
-            <strong>{{ user.getFollows|length }}</strong> abonnements
-            <strong>{{ user.getFollowers|length }}</strong> abonnés
-        </p>
-        <hr>
-        {# Affichage des publications avec le format approprié #}
-        <h3>Publications</h3>
-        {% for post in user.posts %}
-            <div>
-                {% if post.text %}
-                    <p>{{ post.text }}</p>
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="header-banner"></div>
+
+            <div class="profile-info">
+                {% if user.profileImage %}
+                    <img class="avatar" src="{{ asset('uploads/profile_images/' ~ user.profileImage) }}" alt="Photo de profil de {{user.username}}">
+                {% else %}
+                    <div class="avatar default-avatar">B</div>
                 {% endif %}
 
-                {% if post.image %}
-                    <img src="{{asset('/uploads/' ~ post.image) }}" alt="image">
+                {% if app.user and app.user.id == user.id %}
+                    <a href="{{ path('app_profile_edit') }}" class="edit-btn">Modifier mon profil</a>
+                {% elseif app.user %}
+                    {% if app.user.getFollows.contains(user) %}
+                        <form action="{{ path('app_unfollow', { id: user.id }) }}" method="post">
+                            <button type="submit" class="follow-btn">Unfollow</button>
+                        </form>
+                    {% else %}
+                        <form action="{{ path('app_follow', { id: user.id }) }}" method="post">
+                            <button type="submit" class="follow-btn">Follow</button>
+                        </form>
+                    {% endif %}
                 {% endif %}
 
-                {% if post.video %}
-                    <video controls>
-                        <source src="{{asset('uploads/' ~ post.video) }}" type="video/mp4">
-                    </video>
-                {% endif %}}
-                <small>{{ post.createdAt|date('d/m/Y H:i') }}</small>
+                <h2>{{ user.firstname }} {{ user.lastname }}</h2>
+                <p class="username">@{{ user.username }}</p>
+                <p class="created">À rejoint twitter le {{ user.createdAt|date('d/m/Y') }}</p>
+                <p class="follow-stats">
+                    <strong>{{ user.getFollows|length }}</strong> Following
+                    <strong>{{ user.getFollowers|length }}</strong> Followers
+                </p>
             </div>
-        {% else %}
-            <p>Aucun post pour le moment</p>
-        {% endfor %}
+        </div>
+
+
+        <div id="posts-list">
+            {% for post in user.posts %}
+                {% include 'post/_post_item.html.twig' with { post: post } %}
+            {% else %}
+                <p>Aucun post pour le moment</p>
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}
