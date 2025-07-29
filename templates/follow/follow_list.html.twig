@@ -42,10 +42,11 @@
                 <li>
                     {# Affichage de la photo de profil si disponible et d'informations principales d'utilisateurs #}
                     {% if u.profileImage %}
-                        <img src="{{asset('uploads/profile_images/' ~ u.profileImage)}}" alt="Photo de profil de {{u.username}}">
+                <a href="{{ path('app_user_profile', {'username' : u.username}) }}"><img src="{{asset('uploads/profile_images/' ~ u.profileImage)}}" alt="Photo de profil de {{u.username}}"></a>
                     {% endif %}    
-                    <strong>{{u.firstname}} {{u.lastname}}</strong> - @{{u.username}} <br>
-                    <small>{{u.bio}}</small><br>
+                    <a href="{{ path('app_user_profile', {'username' : u.username}) }}"> <strong>{{u.firstname}} {{u.lastname}}</strong> - @{{u.username}}<br>
+                        <small>{{u.bio}}</small><br>
+                    </a>
                     {% if app.user and app.user != u %}
                         {% set isFollowing = u.isFollowedBy(app.user) %}
                         {% set followback = app.user.isFollowedBy(u) %}

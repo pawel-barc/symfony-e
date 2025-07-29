@@ -10,11 +10,19 @@ function initializeSearch() {
     }
 
     // Empêche l'initialisation multiple.
-    if (searchInput.dataset.initialized) return;
+    if (searchInput.dataset.initialized) {
+        searchInput.value = "";
+        resultsContainer.innerHTML = "";
+        return;
+    }
     searchInput.dataset.initialized = "true";
 
+    // Supprime les anciens écouteurs d'événements
+    const newInput = searchInput.cloneNode(true);
+    searchInput.parentNode.replaceChild(newInput, searchInput);
+    const currentSearchInput = newInput;
     // Écoute les changements dans le champ de recherche
-    searchInput.addEventListener("input", async function () {
+    currentSearchInput.addEventListener("input", async function () {
         const query = this.value.trim();
 
         // Si la recherche contient moins de deux caractères, on efface les résultats et on arrête
@@ -38,7 +46,7 @@ function initializeSearch() {
                           .map(
                               (user) => `
                         <div>
-                            <a href="/user/${user.username}">
+                            <a href="/user/${user.username}" data-turbo="false">
                                 <strong>
                                     ${user.firstname} ${user.lastname}
                                 </strong>
@@ -55,11 +63,16 @@ function initializeSearch() {
             resultsContainer.innerHTML = "<div>Erreur de recherche</div>";
         }
     });
-
-    // Réinitialise le champ de recherche et les résultats au chargement
-    searchInput.value = "";
+    // Réinitialise le champ de recherche au chargement initial.
+    currentSearchInput.value = "";
     resultsContainer.innerHTML = "";
 }
+// Gestion spéciale pour le retour en arrière
+window.addEventListener("pageshow", function (event) {
+    if (event.persisted) {
+        initializeSearch();
+    }
+});
 
 // Lance l'initialisation à différents moments de chargement de la page
 document.addEventListener("DOMContentLoaded", initializeSearch);
