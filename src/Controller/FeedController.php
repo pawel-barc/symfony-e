@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Comment;
 use App\Entity\Post;
+use App\Entity\Repost;
 use App\Form\CommentType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,28 +17,42 @@ class FeedController extends AbstractController
     #[Route('/feed', name: 'app_feed')]
     public function index(Request $request, EntityManagerInterface $em): Response
     {
-        // Partie commentaires
-        $comment = new Comment();
-        $form = $this->createForm(CommentType::class, $comment);
-        $form->handleRequest($request);
+        // Récup posts + reposts
+        $posts = $em->getRepository(Post::class)->findBy([], ['createdAt' => 'DESC']);
+        $reposts = $em->getRepository(Repost::class)->findBy([], ['createdAt' => 'DESC']);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $comment->setCreatedAt(new \DateTimeImmutable());
-            $comment->setUser($this->getUser());
-            $em->persist($comment);
-            $em->flush();
-
-            return $this->redirectToRoute('app_feed');
+        $timeline = [];
+        foreach ($posts as $post) {
+            $timeline[] = [
+                'type' => 'post',
+                'data' => $post,
+                'createdAt' => $post->getCreatedAt()
+            ];
+        }
+        foreach ($reposts as $repost) {
+            $timeline[] = [
+                'type' => 'repost',
+                'data' => $repost->getPost(),
+                'createdAt' => $repost->getCreatedAt(),
+                'user' => $repost->getUser()
+            ];
         }
 
-        // Récupération des commentaires et des posts
-        $comments = $em->getRepository(Comment::class)->findBy([], ['createdAt' => 'DESC']);
-        $posts = $em->getRepository(Post::class)->findBy([], ['createdAt' => 'DESC']);
+        // Tri du feed (posts + reposts)
+        usort($timeline, fn($a, $b) => $b['createdAt'] <=> $a['createdAt']);
+
+        // Génération des formulaires de commentaires
+        $commentForms = [];
+        foreach ($timeline as $item) {
+            $post = $item['data'];
+            $comment = new Comment();
+            $comment->setPost($post);
+            $commentForms[$post->getId()] = $this->createForm(CommentType::class, $comment)->createView();
+        }
 
         return $this->render('feed/index.html.twig', [
-            'form' => $form->createView(),
-            'comments' => $comments,
-            'posts' => $posts, // On ajoute les posts au template
+            'timeline' => $timeline,
+            'comment_forms' => $commentForms,
         ]);
     }
 }

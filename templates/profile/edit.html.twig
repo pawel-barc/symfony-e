@@ -2,36 +2,77 @@
 
 {% block title %}Modifier le profil{% endblock %}
 
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/register.css') }}">
+{% endblock %}
+
 {% block body %}
+    <div class="register-container">
+        <h1>Modifier mon profil</h1>
 
-<div>
-    <h1>Modifier le profil</h1>
-    {# Flash messages #}
-    {% for type, messages in app.flashes %}
-        {% for message in messages %}
-            <div role="alert">
-                {{ message }}
-            </div>
+        {# Flash messages #}
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type == 'success' ? 'success' : 'danger' }}">{{ message }}</div>
+            {% endfor %}
         {% endfor %}
-    {% endfor %}
 
-    {# Image du profil #}
-    {% if app.user.profileImage %}
-        <strong>Image actuelle:</strong><br>
-        <img src="{{ asset('uploads/profile_images/' ~ app.user.profileImage) }}"/>
-    {% endif %}
+        {# Image actuelle #}
+        {% if app.user.profileImage %}
+            <div class="form-group full-width">
+                <img src="{{ asset('uploads/profile_images/' ~ app.user.profileImage) }}" style="max-width:120px;border-radius:50%;margin-top:10px;"/>
+            </div>
+        {% endif %}
 
-    {# Formulaire du profil #}
-    {{ form_start(profileForm, {'attr': {'enctype': 'multipart/form-data', 'data-turbo': 'false'}}) }}
-        {{ form_row(profileForm.firstname) }}
-        {{ form_row(profileForm.lastname) }}
-        {{ form_row(profileForm.username) }}
-        {{ form_row(profileForm.email) }}
-        {{ form_row(profileForm.password) }}
-        {{ form_row(profileForm.profileImage) }}
-        {{ form_row(profileForm.bio) }}
+        {{ form_start(profileForm, {'attr': {'enctype': 'multipart/form-data', 'data-turbo': 'false'}}) }}
 
-        <button type="submit">Mettre à jour</button>
-    {{ form_end(profileForm) }}    
-</div>
+        <div class="form-group">
+            {{ form_label(profileForm.firstname) }}
+            {{ form_widget(profileForm.firstname, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(profileForm.firstname) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(profileForm.lastname) }}
+            {{ form_widget(profileForm.lastname, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(profileForm.lastname) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(profileForm.username) }}
+            {{ form_widget(profileForm.username, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(profileForm.username) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(profileForm.email) }}
+            {{ form_widget(profileForm.email, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(profileForm.email) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(profileForm.password) }}
+            {{ form_widget(profileForm.password, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(profileForm.password) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(profileForm.profileImage) }}
+            {{ form_widget(profileForm.profileImage, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(profileForm.profileImage) }}
+        </div>
+
+        <div class="form-group full-width">
+            {{ form_label(profileForm.bio) }}
+            {{ form_widget(profileForm.bio, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(profileForm.bio) }}
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ path('app_user_profile', { username: app.user.username }) }}" class="cancel-btn">Annuler</a>
+            <button type="submit">Mettre à jour</button>
+        </div>
+
+        {{ form_end(profileForm) }}
+    </div>
 {% endblock %}

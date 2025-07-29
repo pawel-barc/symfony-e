@@ -1,7 +1,12 @@
 <div id="posts-list">
     <button class="reload-feed-btn">Recharger mon feed</button>
-    {% for post in posts %}
-        {% include 'post/_post_item.html.twig' with { post: post } %}
+    {% for item in timeline %}
+        {% include 'post/_post_item.html.twig' with {
+            post: item.data,
+            profile_user: item.user is defined ? item.user : (item.data.author ?? null),
+            type: item.type,
+            item: item
+        } %}
     {% else %}
         <p>Aucune publication.</p>
     {% endfor %}

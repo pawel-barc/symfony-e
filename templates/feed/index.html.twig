@@ -14,7 +14,7 @@
         <div class="feed-main">
             {% include 'feed/_tabs.html.twig' %}
             {% include 'post/_create_post.html.twig' %}
-            {% include 'post/_post_list.html.twig' %}
+            {% include 'post/_post_list.html.twig' with { timeline: timeline, comment_forms: comment_forms } %}
             {% include 'comment/_comments.html.twig' %}
         </div>
 

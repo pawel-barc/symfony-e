@@ -9,11 +9,11 @@ body {
     align-items: center;
 }
 .register-container {
-    background: #15202b;
+    background: #0d1117 !important;
     border-radius: 16px;
     border: 1px solid #333;
     padding: 40px;
-    max-width: 600px;
+    max-width: 1000px;
     width: 100%;
     box-sizing: border-box;
 }
@@ -33,7 +33,13 @@ form {
     flex: 1 1 48%;
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
+
+.form-group img{
+    max-width: 12rem !important;
+}
+
 .form-group.full-width {
     flex: 1 1 100%;
 }
@@ -58,7 +64,6 @@ label {
 }
 
 button {
-    margin: 30px auto 0;
     padding: 10px 20px;
     background: #1da1f2;
     border: none;
@@ -68,8 +73,7 @@ button {
     font-size: 16px;
     cursor: pointer;
     display: block;
-    max-width: 200px;
-    width: 100%;
+    width: 30rem;
 }
 button:hover {
     background: #0d8ddb;
@@ -86,4 +90,33 @@ button:hover {
 }
 .alert-success {
     background-color: #17bf63;
+}
+
+/* Boutons d'action */
+.form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 5rem;
+    align-items: center;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.cancel-btn {
+    padding: 10px 20px;
+    background: darkred;
+    border: 1px solid #536471;
+    border-radius: 9999px;
+    color: white;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s;
+    width: 30rem;
+
+    text-align: center;
+}
+
+.cancel-btn:hover {
+    background: #4e0000;
+
 }

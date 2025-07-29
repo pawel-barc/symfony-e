@@ -11,22 +11,28 @@
     </style>
 {% endblock %}
 
-<article class="tweet {% if post.reposts.count > 0 %}repost-container{% endif %}" data-post-id="{{ post.id }}" onclick="goToPost({{ post.id }})" style="cursor:pointer;">
-    {% if post.reposts.count > 0 %}
+{% set type = type is defined ? type : 'post' %}
+{% set item = item is defined ? item : null %}
+{% set profile_user = profile_user is defined ? profile_user : (post.author ?? null) %}
+
+<article class="tweet {% if type == 'repost' %}repost-container{% endif %}" data-post-id="{{ post.id }}" onclick="goToPost({{ post.id }})" style="cursor:pointer;">
+    {% if type == 'repost' and profile_user %}
         <div class="repost-header">
             <span class="repost-icon">
                 <img src="/icons/repost.svg">
             </span>
             <span class="repost-notice">
-                <a href="{{ path('app_user_profile', {username: post.reposts.first().user.username}) }}" class="username-link" onclick="event.stopPropagation()">
-                    {{ post.reposts.first().user.username }}
+                <a href="{{ path('app_user_profile', {username: profile_user.username}) }}" class="username-link" onclick="event.stopPropagation()">
+                    {{ profile_user.username }}
                 </a> a reposté
             </span>
-            <span class="timestamp">· {{ post.reposts.first().createdAt|date('d M Y H:i') }}</span>
+            {% if item %}
+                <span class="timestamp">· {{ item.createdAt|date('d M Y H:i') }}</span>
+            {% endif %}
         </div>
     {% endif %}
 
-    <div class="{% if post.reposts.count > 0 %}repost-content{% endif %}">
+    <div class="{% if type == 'repost' %}repost-content{% endif %}">
         <header class="tweet-header">
             <img class="avatar" src="
             {% if post.author and post.author.profileImage %}
@@ -43,7 +49,6 @@
             </div>
         </header>
 
-        <!-- Le reste du code reste inchangé -->
         <p class="tweet-text">{{ post.text }}</p>
 
         {% if post.image %}
@@ -77,11 +82,11 @@
                 <span class="like-count">{{ post.postLikes|length }}</span>
             </button>
 
-            <div class="comment-form-container" id="comment-form-{{ post.id }}" style="display: none;">
-                {% if comment_forms[post.id] is defined %}
-                    {{ include('comment/_form.html.twig', {form: comment_forms[post.id]}) }}
-                {% endif %}
-            </div>
+{#            <div class="comment-form-container" id="comment-form-{{ post.id }}" style="display: none;">#}
+{#                {% if comment_forms[post.id] is defined %}#}
+{#                    {{ include('comment/_form.html.twig', {form: comment_forms[post.id]}) }}#}
+{#                {% endif %}#}
+{#            </div>#}
         </footer>
     </div>
 </article>

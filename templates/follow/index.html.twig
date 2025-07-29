@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/follow.css') }}">
+{% endblock %}
+
+{% block title %}
+    {% if type == 'followers' %}
+        Abonnés de {{ user.username }}
+    {% else %}
+        Abonnements de {{ user.username }}
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    <div class="profile-container">
+        {% include 'navbar/index.html.twig' %}
+        <div class="profile-main">
+            {% include 'follow/follow_list.html.twig' %}
+        </div>
+        {% include 'sidebar/index.html.twig' %}
+    </div>
+    <script src="{{ asset('js/follow.js') }}"></script>
+{% endblock %}

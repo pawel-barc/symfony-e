@@ -4,9 +4,13 @@ namespace App\Entity;
 
 use App\Repository\FollowRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\UniqueConstraint;
 use ApiPlatform\Metadata\ApiResource;
 
 #[ORM\Entity(repositoryClass: FollowRepository::class)]
+#[ORM\Table(name: 'follow', uniqueConstraints: [
+    new UniqueConstraint(name: 'unique_follow', columns: ['follower_id', 'followed_id'])
+])]
 #[ApiResource]
 class Follow
 {

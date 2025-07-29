@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% if type == 'followers' %}
+        Abonnés de {{ user.username }}
+    {% else %}
+        Abonnements de {{ user.username }}
+    {% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/follow.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="follow-page">
+        <!-- Onglets -->
+        <div class="follow-tabs">
+            <a href="{{ path('user_followers', { username: user.username }) }}"
+               class="tab {{ type == 'followers' ? 'active' : '' }}">
+                Abonnés
+            </a>
+            <a href="{{ path('user_following', { username: user.username }) }}"
+               class="tab {{ type == 'following' ? 'active' : '' }}">
+                Abonnements
+            </a>
+        </div>
+
+        {% if type == 'followers' %}
+            {% set userList = user.getFollowers() %}
+        {% else %}
+            {% set userList = user.getFollows() %}
+        {% endif %}
+
+        {% if userList is empty %}
+            <p class="empty-msg">Aucun utilisateur trouvé</p>
+        {% else %}
+            <div class="follow-list">
+                {% for follow in userList %}
+                    {% if type == 'followers' %}
+                        {% set u = follow.getFollower() %}
+                    {% else %}
+                        {% set u = follow.getFollowed() %}
+                    {% endif %}
+
+                    <div class="follow-item">
+                        <div class="follow-left">
+                            <a href="{{ path('app_user_profile', {'username' : u.username}) }}">
+                                {% if u.profileImage %}
+                                    <img src="{{ asset('uploads/profile_images/' ~ u.profileImage) }}" class="avatar"/>
+                                {% else %}
+                                    <div class="avatar default-avatar">B</div>
+                                {% endif %}
+                            </a>
+                            <div class="follow-info">
+                                <a href="{{ path('app_user_profile', {'username' : u.username}) }}">
+                                    <strong>{{ u.firstname }} {{ u.lastname }}</strong>
+                                </a>
+                                <span class="username">@{{ u.username }}</span>
+                                {% if u.bio %}
+                                    <p class="bio">{{ u.bio }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if app.user and app.user != u %}
+                            {% set isFollowing = u.isFollowedBy(app.user) %}
+                            {% set followback = app.user.isFollowedBy(u) %}
+                            <button class="follow-btn {{ isFollowing ? 'following' : '' }}"
+                                    data-username="{{ u.username }}"
+                                    data-following="{{ isFollowing ? '1' : '0' }}">
+                                {{ isFollowing ? (followback ? '↔ Suivi' : 'Suivi') : 'Suivre' }}
+                            </button>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="{{ asset('js/follow.js') }}"></script>
+{% endblock %}

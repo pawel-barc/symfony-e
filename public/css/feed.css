@@ -11,6 +11,7 @@ body {
     min-height: 100vh;
     font-family: Arial, sans-serif;
     width: 100%;
+    font-size: 1.2rem;
 }
 
 .feed-main {

@@ -4,8 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Post;
 use App\Entity\Comment;
+use App\Entity\PostLike;
+use App\Entity\Repost;
 use App\Form\CommentType;
-use App\Form\PostType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -14,6 +15,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use App\Entity\User;
 
 class PostController extends AbstractController
 {
@@ -25,7 +27,6 @@ class PostController extends AbstractController
             /** @var UploadedFile|null $uploadedFile */
             $uploadedFile = $request->files->get('media');
 
-            // Validation minimale
             if (empty(trim($content)) && !$uploadedFile) {
                 if ($request->isXmlHttpRequest()) {
                     return new JsonResponse(['success' => false, 'error' => 'Vous devez écrire du texte ou ajouter un média.'], 400);
@@ -91,7 +92,6 @@ class PostController extends AbstractController
             }
 
             if ($request->isXmlHttpRequest()) {
-                // Retourne les infos du post pour que le JS puisse l'afficher direct
                 return new JsonResponse([
                     'success' => true,
                     'post' => [
@@ -109,22 +109,75 @@ class PostController extends AbstractController
             return $this->redirectToRoute('app_post');
         }
 
+        // ---- Feed : posts + reposts de tout le monde ----
+        $posts = $em->getRepository(Post::class)->findBy([], ['createdAt' => 'DESC']);
+        $reposts = $em->getRepository(Repost::class)->findBy([], ['createdAt' => 'DESC']);
 
-
-        $posts = $em->getRepository(Post::class)->findAllPostsAndReposts();
-
-        // Préparer les formulaires de commentaire pour chaque post
-        $commentForms = [];
+        $timeline = [];
         foreach ($posts as $post) {
+            $timeline[] = [
+                'type' => 'post',
+                'data' => $post,
+                'createdAt' => $post->getCreatedAt()
+            ];
+        }
+        foreach ($reposts as $repost) {
+            $timeline[] = [
+                'type' => 'repost',
+                'data' => $repost->getPost(),
+                'createdAt' => $repost->getCreatedAt(),
+                'user' => $repost->getUser()
+            ];
+        }
+        usort($timeline, fn($a, $b) => $b['createdAt'] <=> $a['createdAt']);
+
+        $commentForms = [];
+        foreach ($timeline as $item) {
+            $post = $item['data'];
             $comment = new Comment();
             $comment->setPost($post);
             $commentForms[$post->getId()] = $this->createForm(CommentType::class, $comment)->createView();
         }
 
-
-        return $this->render('post/index.html.twig', [
-            'posts' => $posts,
+        return $this->render('feed/index.html.twig', [
+            'timeline' => $timeline,
             'comment_forms' => $commentForms,
+        ]);
+    }
+
+    #[Route('/profile/{username}', name: 'app_user_profile')]
+    public function profile(string $username, EntityManagerInterface $em): Response
+    {
+        $user = $em->getRepository(User::class)->findOneBy(['username' => $username]);
+        if (!$user) {
+            throw $this->createNotFoundException('Utilisateur introuvable.');
+        }
+
+        // ---- Posts et reposts du user ----
+        $posts = $em->getRepository(Post::class)->findBy(['author' => $user], ['createdAt' => 'DESC']);
+        $reposts = $em->getRepository(Repost::class)->findBy(['user' => $user], ['createdAt' => 'DESC']);
+
+        $timeline = [];
+        foreach ($posts as $post) {
+            $timeline[] = [
+                'type' => 'post',
+                'data' => $post,
+                'createdAt' => $post->getCreatedAt()
+            ];
+        }
+        foreach ($reposts as $repost) {
+            $timeline[] = [
+                'type' => 'repost',
+                'data' => $repost->getPost(),
+                'createdAt' => $repost->getCreatedAt(),
+                'user' => $repost->getUser()
+            ];
+        }
+        usort($timeline, fn($a, $b) => $b['createdAt'] <=> $a['createdAt']);
+
+        return $this->render('public.html.twig', [
+            'user' => $user,
+            'timeline' => $timeline,
         ]);
     }
 
@@ -189,14 +242,12 @@ class PostController extends AbstractController
         $alreadyLiked = $post->isLikedByUser($user);
 
         if ($alreadyLiked) {
-            // Retirer le like
             foreach ($post->getPostLikes() as $like) {
                 if ($like->getAuthor() === $user) {
                     $em->remove($like);
                 }
             }
         } else {
-            // Ajouter un like
             $like = new PostLike();
             $like->setPost($post);
             $like->setAuthor($user);

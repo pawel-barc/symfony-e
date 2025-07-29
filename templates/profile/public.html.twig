@@ -1,46 +1,55 @@
-{% extends 'base.html.twig' %}
+<div class="profile">
+    <div class="profile-header">
+        <div class="header-banner"></div>
 
-{% block title %} Profil de {{ user.username }} {% endblock %}
+        <div class="profile-info">
+            {% if user.profileImage %}
+                <img class="avatar" src="{{ asset('uploads/profile_images/' ~ user.profileImage) }}" alt="Photo de profil de {{ user.username }}">
+            {% else %}
+                <div class="avatar default-avatar">B</div>
+            {% endif %}
 
-{% block body %}
-{# Affichage des données personnelles de l'utilisateur, y compris ces publications et abonnements #}
-    <div>
-        <h2>{{ user.firstname }} {{ user.lastname }}</h2>
-        <p>{{ user.getPosts|length }} posts</p>
-        {% if user.profileImage %}
-            <img src="{{ asset('uploads/profile_images/' ~ user.profileImage) }}" alt="Photo de profil de {{user.username}}"><br>
-        {% endif %}
-        <button>Suivre</button><br>
-        <h2>{{ user.firstname}} {{ user.lastname }}</h2>
-        <p>{{ user.username}}</p>
-        <p>{{ user.bio }}</p>
-        <p>Inscrit le {{ user.createdAt|date('d/m/Y') }}</p>
-        <p>
-            <strong>{{ user.getFollows|length }}</strong> abonnements
-            <strong>{{ user.getFollowers|length }}</strong> abonnés
-        </p>
-        <hr>
-        {# Affichage des publications avec le format approprié #}
-        <h3>Publications</h3>
-        {% for post in user.posts %}
-            <div>
-                {% if post.text %}
-                    <p>{{ post.text }}</p>
-                {% endif %}
+            {% if app.user and app.user.id == user.id %}
+                <a href="{{ path('app_profile_edit') }}" class="edit-btn">Modifier mon profil</a>
+            {% elseif app.user and app.user != user %}
+                {% set isFollowing = user.isFollowedBy(app.user) %}
+                {% set followback = app.user.isFollowedBy(user) %}
+                <button class="follow-btn {{ isFollowing ? 'following' : '' }}"
+                        data-username="{{ user.username }}"
+                        data-following="{{ isFollowing ? '1' : '0' }}">
+                    {{ isFollowing ? (followback ? '↔ Suivi' : 'Suivi') : 'Suivre' }}
+                </button>
+            {% endif %}
 
-                {% if post.image %}
-                    <img src="{{asset('/uploads/' ~ post.image) }}" alt="image">
-                {% endif %}
-
-                {% if post.video %}
-                    <video controls>
-                        <source src="{{asset('uploads/' ~ post.video) }}" type="video/mp4">
-                    </video>
-                {% endif %}}
-                <small>{{ post.createdAt|date('d/m/Y H:i') }}</small>
-            </div>
-        {% else %}
-            <p>Aucun post pour le moment</p>
-        {% endfor %}
+            <h2>{{ user.firstname }} {{ user.lastname }}</h2>
+            <p class="username">@{{ user.username }}</p>
+            <p class="created">À rejoint Twitter depuis le {{ user.createdAt|date('m/Y') }}</p>
+            <p class="follow-stats">
+                <a href="{{ path('user_following', { username: user.username }) }}">
+                    <strong>{{ user.getFollows()|length }}</strong> Abonnements
+                </a>
+                <a href="{{ path('user_followers', { username: user.username }) }}">
+                    <strong>{{ user.getFollowers()|length }}</strong> Abonnés
+                </a>
+            </p>
+        </div>
     </div>
-{% endblock %}
+
+    <div id="posts-list">
+        {% if timeline is empty %}
+            <p style="color:#71767b">Aucun post ou retweet pour le moment</p>
+        {% else %}
+            {% for item in timeline %}
+                {% include 'post/_post_item.html.twig' with {
+                    post: item.data,
+                    profile_user: user,
+                    type: item.type,
+                    item: item
+                } %}
+            {% endfor %}
+
+        {% endif %}
+    </div>
+</div>
+
+<script src="{{ asset('js/follow.js') }}"></script>
