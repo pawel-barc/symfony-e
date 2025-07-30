@@ -147,4 +147,5 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("Erreur lors du rechargement du feed :", error);
         }
     });
+
 });
