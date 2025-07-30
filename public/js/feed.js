@@ -1,93 +1,150 @@
-document
-    .getElementById("media-upload")
-    .addEventListener("change", function (e) {
-        const file = e.target.files[0];
-        if (!file) return;
+// ========================================================
+// Gestion globale des likes & reposts avec event delegation
+// ========================================================
 
-        const imageContainer = document.getElementById("image-container");
-        const videoContainer = document.getElementById("video-container");
-        const imagePreview = document.getElementById("image-preview");
-        const videoPreview = document.getElementById("video-preview");
+// Map de locks pour éviter le spam de requêtes
+if (typeof window.likeLocks === "undefined") {
+    window.likeLocks = new Map();
+}
 
-        // Reset affichage
-        imageContainer.style.display = "none";
-        videoContainer.style.display = "none";
-        imagePreview.src = "";
-        videoPreview.src = "";
+// ========================================================
+// Handlers
+// ========================================================
+async function handleLikeClick(button) {
+    const postId = button.dataset.postId;
+    const likeCountSpan = button.querySelector('.like-count');
 
-        if (file.type.startsWith("image/")) {
-            imagePreview.src = URL.createObjectURL(file);
-            imageContainer.style.display = "block";
-        } else if (file.type.startsWith("video/")) {
-            videoPreview.src = URL.createObjectURL(file);
-            videoContainer.style.display = "block";
+    if (window.likeLocks.get(`like_${postId}`)) return;
+    window.likeLocks.set(`like_${postId}`, true);
+
+    try {
+        const response = await fetch(`/post/${postId}/like`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        });
+
+        if (!response.ok) throw new Error('Erreur réseau');
+
+        const data = await response.json();
+
+        // Update UI (serveur = source de vérité)
+        likeCountSpan.textContent = data.count;
+        button.classList.toggle('liked', data.liked);
+
+        // Sauvegarde localStorage
+        localStorage.setItem(`likeState_${postId}`, JSON.stringify({
+            count: data.count,
+            liked: data.liked
+        }));
+
+    } catch (error) {
+        console.error("Erreur:", error);
+    } finally {
+        window.likeLocks.delete(`like_${postId}`);
+    }
+}
+
+async function handleRepostClick(button) {
+    const postId = button.dataset.postId;
+
+    if (window.likeLocks.get(`repost_${postId}`)) return;
+    window.likeLocks.set(`repost_${postId}`, true);
+
+    try {
+        const response = await fetch(`/post/${postId}/repost`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        });
+
+        if (!response.ok) throw new Error('Erreur réseau');
+
+        const data = await response.json();
+
+        if (data.success) {
+            button.classList.toggle('reposted', data.reposted);
+            button.querySelector('.repost-count').textContent = data.repostsCount;
         }
-    });
 
-// Reset media (croix rouge)
-document.querySelectorAll(".remove-media").forEach((btn) => {
-    btn.addEventListener("click", () => {
-        const imageContainer = document.getElementById("image-container");
-        const videoContainer = document.getElementById("video-container");
-        const imagePreview = document.getElementById("image-preview");
-        const videoPreview = document.getElementById("video-preview");
-        const fileInput = document.getElementById("media-upload");
+    } catch (error) {
+        console.error('Erreur:', error);
+    } finally {
+        window.likeLocks.delete(`repost_${postId}`);
+    }
+}
 
-        imageContainer.style.display = "none";
-        videoContainer.style.display = "none";
-        imagePreview.src = "";
-        videoPreview.src = "";
-        fileInput.value = "";
-    });
-});
+// ========================================================
+// Event delegation
+// ========================================================
+document.addEventListener("DOMContentLoaded", function () {
+    const postsList = document.getElementById("posts-list");
 
-document.getElementById("post-form").addEventListener("submit", function (e) {
-    e.preventDefault();
+    if (postsList) {
+        postsList.addEventListener("click", function (e) {
+            const likeBtn = e.target.closest(".like-btn");
+            const repostBtn = e.target.closest(".repost-btn");
 
-    const formData = new FormData(this);
-
-    fetch(this.action, {
-        method: "POST",
-        body: formData,
-        headers: {
-            "X-Requested-With": "XMLHttpRequest",
-        },
-    })
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.success) {
-                const postsList = document.getElementById("posts-list");
-                const newPost = document.createElement("div");
-                newPost.classList.add("post");
-
-                newPost.innerHTML = `
-                    <p>${data.post.text}</p>
-                    ${
-                        data.post.image
-                            ? `<img src="${data.post.image}" style="max-width: 100%; max-height: 300px; margin-top: 10px;">`
-                            : ""
-                    }
-                    ${
-                        data.post.video
-                            ? `<video controls style="max-width: 100%; max-height: 300px; margin-top: 10px;"><source src="${data.post.video}" type="video/mp4"></video>`
-                            : ""
-                    }
-                    <small>Posté par ${data.post.author} le ${
-                    data.post.createdAt
-                }</small>
-                    <a href="/post/${data.post.id}">Voir le post</a>
-                `;
-
-                postsList.prepend(newPost);
-                document.getElementById("post-form").reset();
-
-                // Clique sur la croix rouge pour reset preview
-                document
-                    .querySelectorAll(".remove-media")
-                    .forEach((btn) => btn.click());
-            } else {
-                alert("Erreur lors de la publication");
+            if (likeBtn) {
+                e.preventDefault();
+                handleLikeClick(likeBtn);
+            } else if (repostBtn) {
+                e.preventDefault();
+                handleRepostClick(repostBtn);
             }
-        })
-        .catch((err) => alert("Erreur: " + err));
+        });
+
+        // Restauration état like depuis localStorage
+        postsList.querySelectorAll(".like-btn").forEach(button => {
+            const postId = button.dataset.postId;
+            const savedState = localStorage.getItem(`likeState_${postId}`);
+            if (savedState) {
+                const { count, liked } = JSON.parse(savedState);
+                button.querySelector('.like-count').textContent = count;
+                button.classList.toggle('liked', liked);
+            }
+        });
+    }
+
+    // ========================================================
+    // Reload du feed
+    // ========================================================
+    const reloadBtn = document.getElementById("reload-feed-btn");
+    if (reloadBtn && postsList) {
+        reloadBtn.addEventListener("click", async function () {
+            try {
+                const response = await fetch(window.location.href, {
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                });
+                const html = await response.text();
+
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+                const newPosts = doc.querySelector("#posts-list").innerHTML;
+
+                postsList.innerHTML = newPosts;
+
+                // ⚡ plus besoin de réattacher les listeners → event delegation gère tout
+                // On restaure juste l’état des likes depuis localStorage
+                postsList.querySelectorAll(".like-btn").forEach(button => {
+                    const postId = button.dataset.postId;
+                    const savedState = localStorage.getItem(`likeState_${postId}`);
+                    if (savedState) {
+                        const { count, liked } = JSON.parse(savedState);
+                        button.querySelector('.like-count').textContent = count;
+                        button.classList.toggle('liked', liked);
+                    }
+                });
+
+            } catch (error) {
+                console.error("Erreur lors du rechargement du feed :", error);
+            }
+        });
+    }
 });

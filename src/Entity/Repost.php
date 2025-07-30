@@ -13,21 +13,16 @@ class Repost
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'reposts')]
+    #[ORM\ManyToOne(inversedBy: 'reposts')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: 'reposts')]
+    #[ORM\ManyToOne(inversedBy: 'reposts')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Post $post = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
-
-    public function __construct()
-    {
-        $this->createdAt = new \DateTimeImmutable();
-    }
 
     public function getId(): ?int
     {

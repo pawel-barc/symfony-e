@@ -55,4 +55,36 @@ class FeedController extends AbstractController
             'comment_forms' => $commentForms,
         ]);
     }
+
+    #[Route('/feed/reload', name: 'feed_reload')]
+    public function reload(EntityManagerInterface $em): Response
+    {
+        // Récup posts + reposts
+        $posts = $em->getRepository(Post::class)->findBy([], ['createdAt' => 'DESC']);
+        $reposts = $em->getRepository(Repost::class)->findBy([], ['createdAt' => 'DESC']);
+
+        $timeline = [];
+        foreach ($posts as $post) {
+            $timeline[] = [
+                'type' => 'post',
+                'data' => $post,
+                'createdAt' => $post->getCreatedAt()
+            ];
+        }
+        foreach ($reposts as $repost) {
+            $timeline[] = [
+                'type' => 'repost',
+                'data' => $repost->getPost(),
+                'createdAt' => $repost->getCreatedAt(),
+                'user' => $repost->getUser()
+            ];
+        }
+
+        // Tri du feed (posts + reposts)
+        usort($timeline, fn($a, $b) => $b['createdAt'] <=> $a['createdAt']);
+
+        return $this->render('post/_feed_list.html.twig', [
+            'timeline' => $timeline,
+        ]);
+    }
 }

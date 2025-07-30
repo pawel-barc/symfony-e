@@ -134,7 +134,7 @@ body {
     width: 50px !important;
 }
 
-.reload-feed-btn{
+#reload-feed-btn{
     all: unset;
     display: flow;
     width: 100%;
@@ -145,6 +145,7 @@ body {
     transition: background-color 0.3s ease;
 }
 
-.reload-feed-btn:hover {
+#reload-feed-btn:hover {
     background-color: #11161e;
+    cursor: pointer;
 }

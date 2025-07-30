@@ -91,6 +91,7 @@
     font-size: 1.5rem;
     margin-bottom: 10px;
     white-space: pre-line;
+    padding-left: 4rem;
 }
 
 .tweet-media img,
@@ -165,6 +166,10 @@
     content: url('../icons/repost_active.svg');
     transform: scale(1.1);
     filter: drop-shadow(0 0 1px #489a48); /* vert glow chill */
+}
+
+.repost-btn.reposted:hover{
+    transform: scale(1.1);
 }
 
 .comment-form-container {
@@ -279,9 +284,11 @@
     padding-left: 4rem;
 }
 
+
+
 .repost-content .tweet-media img,
 .repost-content .tweet-media video {
-    width: 100%;
+    width: 30%;
     max-height: 400px;
 }
 
@@ -290,3 +297,66 @@
     padding-top: 8px;
     border-top: none;
 }
+
+.username-link {
+    text-decoration: none;
+    color: inherit;
+}
+.username-link:hover {
+    text-decoration: underline;
+}
+
+/* Image dans un post */
+.tweet-media img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tweet-media img:hover {
+    border: 1px solid #888;
+    transform: scale(1.03);
+}
+
+/* Modale image */
+.image-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    justify-content: center;
+    align-items: center;
+}
+
+.image-modal img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 20px;
+}
+
+.image-modal .close-btn {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.image-modal .close-btn img {
+    width: 30px;
+    height: 30px;
+}
+
+.tweet-media{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+

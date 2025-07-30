@@ -92,44 +92,45 @@ class PostController extends AbstractController
             }
 
             if ($request->isXmlHttpRequest()) {
-                return new JsonResponse([
-                    'success' => true,
-                    'post' => [
-                        'id' => $post->getId(),
-                        'text' => $post->getText(),
-                        'image' => $post->getImage(),
-                        'video' => $post->getVideo(),
-                        'author' => $post->getAuthor()->getUsername(),
-                        'createdAt' => $post->getCreatedAt()->format('d/m/Y H:i'),
-                    ],
+                return $this->render('post/_post_item.html.twig', [
+                    'post' => $post,
+                    'profile_user' => $post->getAuthor(),
+                    'type' => 'post'
                 ]);
             }
+
 
             $this->addFlash('success', 'Post créé avec succès.');
             return $this->redirectToRoute('app_post');
         }
 
-        // ---- Feed : posts + reposts de tout le monde ----
+        // ---- Feed : posts + reposts ----
+        // ---- Feed : posts + reposts ----
         $posts = $em->getRepository(Post::class)->findBy([], ['createdAt' => 'DESC']);
         $reposts = $em->getRepository(Repost::class)->findBy([], ['createdAt' => 'DESC']);
 
         $timeline = [];
+
         foreach ($posts as $post) {
             $timeline[] = [
                 'type' => 'post',
                 'data' => $post,
+                'user' => $post->getAuthor(), // <= on garde toujours 'user'
                 'createdAt' => $post->getCreatedAt()
             ];
         }
+
         foreach ($reposts as $repost) {
             $timeline[] = [
                 'type' => 'repost',
-                'data' => $repost->getPost(),
-                'createdAt' => $repost->getCreatedAt(),
-                'user' => $repost->getUser()
+                'data' => $repost->getPost(),   // le post original
+                'user' => $repost->getUser(),   // celui qui a reposté
+                'createdAt' => $repost->getCreatedAt()
             ];
         }
+
         usort($timeline, fn($a, $b) => $b['createdAt'] <=> $a['createdAt']);
+
 
         $commentForms = [];
         foreach ($timeline as $item) {
@@ -162,6 +163,7 @@ class PostController extends AbstractController
             $timeline[] = [
                 'type' => 'post',
                 'data' => $post,
+                'user' => $post->getAuthor(),
                 'createdAt' => $post->getCreatedAt()
             ];
         }
@@ -169,8 +171,8 @@ class PostController extends AbstractController
             $timeline[] = [
                 'type' => 'repost',
                 'data' => $repost->getPost(),
-                'createdAt' => $repost->getCreatedAt(),
-                'user' => $repost->getUser()
+                'user' => $repost->getUser(),
+                'createdAt' => $repost->getCreatedAt()
             ];
         }
         usort($timeline, fn($a, $b) => $b['createdAt'] <=> $a['createdAt']);

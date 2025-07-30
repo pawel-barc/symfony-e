@@ -1,15 +1,4 @@
-{% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('css/post.css') }}">
-    <style>
-        .username-link {
-            text-decoration: none;
-            color: inherit;
-        }
-        .username-link:hover {
-            text-decoration: underline;
-        }
-    </style>
-{% endblock %}
+
 
 {% set type = type is defined ? type : 'post' %}
 {% set item = item is defined ? item : null %}
@@ -70,7 +59,7 @@
             </button>
             <button class="action-btn repost-btn {{ post.isRepostedByUser(app.user) ? 'reposted' : '' }}"
                     data-post-id="{{ post.id }}"
-                    onclick="event.stopPropagation(); handleRepost(this, {{ post.id }})">
+                    onclick="event.stopPropagation()">
                 <img src="{{ asset('icons/repost.svg') }}" class="repost-icon"/>
                 <span class="repost-count">{{ post.reposts.count }}</span>
             </button>
@@ -91,7 +80,62 @@
     </div>
 </article>
 
+<!-- Modale image -->
+<div id="image-modal" class="image-modal">
+    <button class="close-btn">
+        <img src="/icons/close.svg" alt="Fermer">
+    </button>
+    <img id="modal-image" src="" alt="">
+</div>
+
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const postsList = document.getElementById("posts-list");
+        const imageModal = document.getElementById("image-modal");
+        const modalImg = document.getElementById("modal-image");
+        const closeBtn = imageModal.querySelector(".close-btn");
+
+        // Event delegation sur toute la liste des posts
+        if (postsList) {
+            postsList.addEventListener("click", function (e) {
+                const likeBtn = e.target.closest(".like-btn");
+                const repostBtn = e.target.closest(".repost-btn");
+                const commentBtn = e.target.closest(".comment-btn");
+                const mediaImg = e.target.closest(".tweet-media img");
+
+                if (likeBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleLikeClick(likeBtn);
+                } else if (repostBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleRepostClick(repostBtn);
+                } else if (commentBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleCommentForm(commentBtn.dataset.postId);
+                } else if (mediaImg) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    modalImg.src = mediaImg.src;
+                    imageModal.style.display = "flex";
+                }
+            });
+        }
+
+        // Fermeture du modal image
+        closeBtn.addEventListener("click", function () {
+            imageModal.style.display = "none";
+        });
+
+        imageModal.addEventListener("click", function (e) {
+            if (e.target.id === "image-modal") {
+                imageModal.style.display = "none";
+            }
+        });
+    });
+
     function goToPost(postId) {
         window.location.href = '/post/' + postId;
     }
@@ -100,11 +144,11 @@
         const formContainer = document.getElementById(`comment-form-${postId}`);
         if (!formContainer) return;
 
-        const currentDisplay = window.getComputedStyle(formContainer).display;
-        formContainer.style.display = (currentDisplay === 'none') ? 'block' : 'none';
+        const isHidden = window.getComputedStyle(formContainer).display === "none";
+        formContainer.style.display = isHidden ? "block" : "none";
 
-        if (formContainer.style.display === 'block') {
-            formContainer.scrollIntoView({ behavior: 'smooth' });
+        if (isHidden) {
+            formContainer.scrollIntoView({ behavior: "smooth" });
         }
     }
 </script>
