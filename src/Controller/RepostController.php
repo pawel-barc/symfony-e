@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Post;
 use App\Entity\Repost;
+use App\Entity\Notification;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,8 +30,20 @@ class RepostController extends AbstractController
                 'post' => $post
             ]);
 
+            // Si le repost existe déjà, on l'annule et supprime également la notification associée
             if ($existing) {
                 $em->remove($existing);
+                $notificationRepo = $em->getRepository(Notification::class);
+                $notification = $notificationRepo->findOneBy([
+                    'sender' => $user,
+                    'receiver' => $post->getAuthor(),
+                    'type' => ['repost'],
+                    'entityId' => $post->getId() 
+
+                ]);
+                if ($notification) {
+                    $em->remove($notification);
+                }
                 $em->flush();
 
                 return $this->json([
@@ -46,6 +59,17 @@ class RepostController extends AbstractController
             $repost->setCreatedAt(new \DateTimeImmutable());
 
             $em->persist($repost);
+
+            // Création d'une notification
+            if ($post->getAuthor() !== $user) {
+                $notification = new Notification();
+                $notification->setSender($user);
+                $notification->setReceiver($post->getAuthor());
+                $notification->setType(['repost']);
+                $notification->setEntityId($post->getId());
+                $notification->setIsRead(false);
+                $em->persist($notification);
+            }
             $em->flush();
 
             return $this->json([

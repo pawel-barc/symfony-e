@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+    {% block title %} Notifications {% endblock %}
+    {% block body %}
+        <h1>Notifications</h1>
+
+        <ul>
+            {% for notification in notifications %}    
+                <li class="{{ notification.isRead ? 'read' : 'unread' }}">
+                    <a href="{{ path('app_notification_read', {id: notification.id}) }}">
+                        {{ notification.type[0]|capitalize }} Notifications de {{ notification.sender.username }}
+                        ({{ notification.createdAt|date('Y-m-d H:i') }})
+                    </a>
+                </li>
+            {% else %}
+                <li>Pas de notifications</li>
+            {% endfor %}
+        </ul>
+    {% endblock %}

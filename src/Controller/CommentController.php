@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Comment;
 use App\Entity\Post;
+use App\Entity\Notification;
 use App\Form\CommentType;
 use App\Repository\CommentRepository;
 use App\Repository\PostRepository;
@@ -29,9 +30,21 @@ class CommentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $comment->setAuthor($this->getUser());
+            $user = $this->getUser();
+            $comment->setAuthor($user);
             $comment->setPost($post);
             $entityManager->persist($comment);
+
+            // Notification pour l'auteur du post (si ce n'est pas lui qui commente)
+            if ( $post->getUser() !== $user) {
+                $notification = new Notification();
+                $notification->setSender($user);
+                $notification->setReceiver($post->getUser());
+                $notification->setType(['comment']);
+                $notification->setEntityId($post->getId());
+                $notification->setIsRead(false);
+                $entityManager->persist($notification);
+            }
             $entityManager->flush();
         }
 
@@ -51,10 +64,22 @@ class CommentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $comment->setAuthor($this->getUser());
+            $user = $this->getUser();
+            $comment->setAuthor($user);
             $comment->setPost($parentComment->getPost());
             $comment->setParentComment($parentComment);
             $entityManager->persist($comment);
+            
+            // Notification pour l'auteur du commentaire parent (si ce n'est pas lui qui répond)
+            if ( $parentComment->getAuthor() !== $user) {
+                $notification = new Notification();
+                $notification->setSender($user);
+                $notification->setReceiver($parentComment->getAuthor());
+                $notification->setType(['reply']);
+                $notification->setEntityId($parentComment->getPost()->getId());
+                $notification->setIsRead(false);
+                $entityManager->persist($notification);
+            }
             $entityManager->flush();
         }
 

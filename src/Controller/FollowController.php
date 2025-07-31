@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Entity\Follow;
+use App\Entity\Notification;
 use App\Repository\FollowRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -60,6 +61,16 @@ final class FollowController extends AbstractController
             $follow->setFollower($currentUser);
             $follow->setFollowed($userToFollow);
             $em->persist($follow);
+            // Création de Notification
+            if ($currentUser !== $userToFollow) {
+                    $notification = new Notification();
+                    $notification->setSender($currentUser);
+                    $notification->setReceiver($userToFollow);
+                    $notification->setType(['follow']);
+                    $notification->setEntityId($userToFollow->getId());
+                    $notification->setIsRead(false);
+                    $em->persist($notification);
+            }
             $em->flush();
         }
 
@@ -108,6 +119,16 @@ final class FollowController extends AbstractController
 
         if ($existingFollow) {
             $em->remove($existingFollow);
+            // Création de Notification
+            if ($currentUser !== $userToUnfollow) {
+                    $notification = new Notification();
+                    $notification->setSender($currentUser);
+                    $notification->setReceiver($userToUnfollow);
+                    $notification->setType(['unfollow']);
+                    $notification->setEntityId($userToUnfollow->getId());
+                    $notification->setIsRead(false);
+                    $em->persist($notification);
+            }
             $em->flush();
         }
 
