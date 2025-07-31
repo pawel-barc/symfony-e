@@ -1,18 +1,27 @@
 {% extends 'base.html.twig' %}
     {% block title %} Notifications {% endblock %}
+    {% block stylesheets %}
+        <link rel="stylesheet" href="{{ asset('css/notification.css') }}">
+    {% endblock %}    
     {% block body %}
-        <h1>Notifications</h1>
-
-        <ul>
-            {% for notification in notifications %}    
-                <li class="{{ notification.isRead ? 'read' : 'unread' }}">
-                    <a href="{{ path('app_notification_read', {id: notification.id}) }}">
-                        {{ notification.type[0]|capitalize }} Notifications de {{ notification.sender.username }}
-                        ({{ notification.createdAt|date('Y-m-d H:i') }})
-                    </a>
-                </li>
-            {% else %}
-                <li>Pas de notifications</li>
-            {% endfor %}
-        </ul>
-    {% endblock %}
+    <div class="notification-container">
+        {% include 'navbar/index.html.twig' %}
+        <div class="notification-child">
+            <h1 class="not-title">Notifications</h1><br>
+            <ul>
+                {% for notification in notifications %}    
+                    <li class="{{ notification.isRead ? 'read' : 'unread' }}"><hr>
+                        <a class="not-link" href="{{ path('app_notification_read', {id: notification.id}) }}">
+                            <div class="list-item">
+                                <h4 class="item-title">{{ notification.type[0]|capitalize }}</h4><h4 class="item-title"> Interaction de</h4> <h4 class="item-title">{{ notification.sender.username }}</h4>
+                                <small>({{ notification.createdAt|date('Y-m-d H:i') }})</small>
+                            </div>
+                        </a>
+                    </li>
+                {% else %}
+                    <li>Pas de notifications</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}

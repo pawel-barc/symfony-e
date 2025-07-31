@@ -1,0 +1,46 @@
+.notification-container {
+    display: flex;
+    flex-direction: row;
+}
+.notification-child {
+    padding: 2%;
+}
+.not-title {
+    color: white;
+    text-align: center;
+}
+.item-title {
+    color: white;
+    margin: 0 1vw;
+    width: 100px;
+    font-size: medium;
+}
+.not-link {
+    text-decoration: none;
+    color: #1da1f2;
+}
+.list-item:hover {
+    color: #90c1df;
+    border-bottom: 2px;
+    text-decoration: underline;
+    background-color: #11161e;
+}
+
+.read,
+.unread {
+    list-style: none;
+}
+
+.read {
+    color: antiquewhite;
+}
+.unread {
+    font-weight: bolder;
+    color: white;
+}
+.list-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
