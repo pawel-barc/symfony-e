@@ -1,6 +1,9 @@
 body {
     display: flex;
     color: white;
+    background-color: #0d1117;
+    font-size: 1.2rem;
+
 }
 
 .feed-container {
@@ -11,7 +14,6 @@ body {
     min-height: 100vh;
     font-family: Arial, sans-serif;
     width: 100%;
-    font-size: 1.2rem;
 }
 
 .feed-main {
@@ -31,6 +33,7 @@ body {
     background: rgba(13, 17, 23, 0.29);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    z-index: 1000;
 }
 
 .feed-tabs .tab {

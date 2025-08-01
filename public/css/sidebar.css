@@ -6,7 +6,6 @@
     padding: 20px;
     flex-direction: column;
     justify-content: space-around;
-    max-height: 100svh;
     border-left: 1px solid #51515180;
 }
 
@@ -15,6 +14,7 @@
     padding: 10px 15px;
     border-radius: 9999px;
     margin-bottom: 20px;
+    height: 2rem;
 }
 
 .search-bar input {

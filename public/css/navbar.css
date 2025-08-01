@@ -2,8 +2,7 @@
 .navbar {
     position: sticky !important;
     top: 0 !important;
-    height: 100vh;
-    width: 200px;
+    width: 15rem;
     display: flex;
     justify-content: center;
     align-items: center;
