@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<h1>Chat</h1>
+
+<div id="chat-box" style="border:1px solid #ccc; padding:10px; height:300px; overflow-y:scroll; color:white;">
+  <ul id="messages"></ul>
+</div>
+
+<div style="margin-top:10px;">
+  <input type="text" id="messageInput" placeholder="Écris un message..." />
+  <button id="sendBtn">Envoyer</button>
+</div>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+  // Obtenir les informations de l'utilisateur Symfony
+  const userId = {{ app.user ? app.user.id : 'null' }};
+  const username = "{{ app.user ? app.user.username : 'Anonyme' }}"; // ou app.user.getUserIdentifier()
+  const room = 'global';
+
+  const socket = io("http://localhost:3001", {
+    query: { userId: userId }
+  });
+
+  // Rejoindre une salle
+  socket.emit("join_room", room);
+
+  // Envoi du message
+  document.getElementById("sendBtn").addEventListener("click", () => {
+    const message = document.getElementById("messageInput").value.trim();
+    if (!message) return;
+
+    socket.emit("send_message", {
+      text: message,
+      room: room,
+      authorId: userId,
+      username: username // 🔥 Ajout du nom d'utilisateur
+    });
+
+    document.getElementById("messageInput").value = '';
+  });
+
+  // Réception du message
+  socket.on("receive_message", (data) => {
+    const el = document.createElement("li");
+    el.textContent = `[${data.username}] ${data.text}`; // 🔥 Affiche le nom d'utilisateur
+    document.getElementById("messages").appendChild(el);
+  });
+</script>
+
+{% endblock %}
