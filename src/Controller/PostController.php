@@ -49,11 +49,7 @@ class PostController extends AbstractController
 
                 $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
                 $safeFilename = $slugger->slug($originalFilename);
-                $extension = strtolower($uploadedFile->guessExtension());
-
-                if (!$extension) {
-                    $extension = strtolower(pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_EXTENSION));
-                }
+                $extension = strtolower($uploadedFile->guessExtension() ?: pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_EXTENSION));
                 $newFilename = $safeFilename . '-' . uniqid() . '.' . $extension;
 
                 try {
@@ -99,38 +95,32 @@ class PostController extends AbstractController
                 ]);
             }
 
-
             $this->addFlash('success', 'Post créé avec succès.');
             return $this->redirectToRoute('app_post');
         }
 
         // ---- Feed : posts + reposts ----
-        // ---- Feed : posts + reposts ----
         $posts = $em->getRepository(Post::class)->findBy([], ['createdAt' => 'DESC']);
         $reposts = $em->getRepository(Repost::class)->findBy([], ['createdAt' => 'DESC']);
 
         $timeline = [];
-
         foreach ($posts as $post) {
             $timeline[] = [
                 'type' => 'post',
                 'data' => $post,
-                'user' => $post->getAuthor(), // <= on garde toujours 'user'
+                'user' => $post->getAuthor(),
                 'createdAt' => $post->getCreatedAt()
             ];
         }
-
         foreach ($reposts as $repost) {
             $timeline[] = [
                 'type' => 'repost',
-                'data' => $repost->getPost(),   // le post original
-                'user' => $repost->getUser(),   // celui qui a reposté
+                'data' => $repost->getPost(),
+                'user' => $repost->getUser(),
                 'createdAt' => $repost->getCreatedAt()
             ];
         }
-
         usort($timeline, fn($a, $b) => $b['createdAt'] <=> $a['createdAt']);
-
 
         $commentForms = [];
         foreach ($timeline as $item) {
@@ -154,7 +144,6 @@ class PostController extends AbstractController
             throw $this->createNotFoundException('Utilisateur introuvable.');
         }
 
-        // ---- Posts et reposts du user ----
         $posts = $em->getRepository(Post::class)->findBy(['author' => $user], ['createdAt' => 'DESC']);
         $reposts = $em->getRepository(Repost::class)->findBy(['user' => $user], ['createdAt' => 'DESC']);
 

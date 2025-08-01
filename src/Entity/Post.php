@@ -40,11 +40,17 @@ class Post
     #[ORM\OneToMany(mappedBy: 'post', targetEntity: Repost::class, orphanRemoval: true, cascade: ['remove'])]
     private Collection $reposts;
 
+    // ✅ Relation avec les hashtags
+    #[ORM\ManyToMany(targetEntity: Hashtag::class, inversedBy: 'posts', cascade: ['persist'])]
+    #[ORM\JoinTable(name: 'post_hashtag')]
+    private Collection $hashtags;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();
         $this->postLikes = new ArrayCollection();
         $this->reposts = new ArrayCollection();
+        $this->hashtags = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -107,9 +113,7 @@ class Post
         return $this;
     }
 
-    /**
-     * @return Collection<int, Comment>
-     */
+    /** @return Collection<int, Comment> */
     public function getComments(): Collection
     {
         return $this->comments;
@@ -134,9 +138,7 @@ class Post
         return $this;
     }
 
-    /**
-     * @return Collection<int, PostLike>
-     */
+    /** @return Collection<int, PostLike> */
     public function getPostLikes(): Collection
     {
         return $this->postLikes;
@@ -161,9 +163,7 @@ class Post
         return $this;
     }
 
-    /**
-     * @return Collection<int, Repost>
-     */
+    /** @return Collection<int, Repost> */
     public function getReposts(): Collection
     {
         return $this->reposts;
@@ -197,5 +197,32 @@ class Post
             }
         }
         return false;
+    }
+
+    // ✅ Gestion des hashtags
+    /** @return Collection<int, Hashtag> */
+    public function getHashtags(): Collection
+    {
+        return $this->hashtags;
+    }
+
+    public function addHashtag(Hashtag $hashtag): static
+    {
+        if (!$this->hashtags->contains($hashtag)) {
+            $this->hashtags->add($hashtag);
+        }
+        return $this;
+    }
+
+    public function removeHashtag(Hashtag $hashtag): static
+    {
+        $this->hashtags->removeElement($hashtag);
+        return $this;
+    }
+
+    public function clearHashtags(): static
+    {
+        $this->hashtags->clear();
+        return $this;
     }
 }

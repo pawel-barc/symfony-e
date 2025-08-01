@@ -2,116 +2,87 @@
 
 namespace App\Entity;
 
-use App\Repository\HashtagRepository;
+// Import des classes nécessaires pour gérer les collections (relations ManyToMany)
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use ApiPlatform\Metadata\ApiResource;
 
-#[ORM\Entity(repositoryClass: HashtagRepository::class)]
-#[ApiResource]
+#[ORM\Entity()] // Annotation indiquant que cette classe est une entité Doctrine
 class Hashtag
 {
+    // ID unique du hashtag (clé primaire en base)
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: "integer")]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255, unique: true)]
+    // Nom du hashtag (ex: #cc) qui doit être unique dans la base
+    #[ORM\Column(type: "string", length: 255, unique: true)]
     private ?string $name = null;
 
-    /**
-     * @var Collection<int, PostHashtag>
-     */
-    #[ORM\OneToMany(targetEntity: PostHashtag::class, mappedBy: 'hashtag', orphanRemoval: true)]
-    private Collection $postHashtags;
-
-    /**
-     * @var Collection<int, UserHashtagLike>
-     */
-    #[ORM\OneToMany(targetEntity: UserHashtagLike::class, mappedBy: 'hashtag', orphanRemoval: true)]
-    private Collection $userHashtagLikes;
+    // Relation ManyToMany avec l'entité Post
+    // Un hashtag peut être lié à plusieurs posts et inversement
+    #[ORM\ManyToMany(targetEntity: Post::class, mappedBy: "hashtags")]
+    private Collection $posts;
 
     public function __construct()
     {
-        $this->postHashtags = new ArrayCollection();
-        $this->userHashtagLikes = new ArrayCollection();
+        // Initialisation de la collection des posts pour éviter les erreurs
+        $this->posts = new ArrayCollection();
     }
 
+    // --- GETTERS & SETTERS ---
+
+    // Retourne l'ID du hashtag
     public function getId(): ?int
     {
         return $this->id;
     }
 
+    // Retourne le nom du hashtag
     public function getName(): ?string
     {
         return $this->name;
     }
 
-    public function setName(string $name): static
+    // Définit le nom du hashtag
+    public function setName(string $name): self
     {
         $this->name = $name;
-
         return $this;
     }
 
     /**
-     * @return Collection<int, PostHashtag>
+     * Retourne la liste des posts qui contiennent ce hashtag
+     * @return Collection<int, Post>
      */
-    public function getPostHashtags(): Collection
+    public function getPosts(): Collection
     {
-        return $this->postHashtags;
+        return $this->posts;
     }
 
-    public function addPostHashtag(PostHashtag $postHashtag): static
+    // Ajoute un post à la collection et synchronise la relation du côté Post
+    public function addPost(Post $post): self
     {
-        if (!$this->postHashtags->contains($postHashtag)) {
-            $this->postHashtags->add($postHashtag);
-            $postHashtag->setHashtag($this);
+        if (!$this->posts->contains($post)) {
+            $this->posts->add($post);
+            $post->addHashtag($this); // Maintient la cohérence des deux côtés de la relation
         }
-
         return $this;
     }
 
-    public function removePostHashtag(PostHashtag $postHashtag): static
+    // Retire un post de la collection et synchronise du côté Post
+    public function removePost(Post $post): self
     {
-        if ($this->postHashtags->removeElement($postHashtag)) {
-            // set the owning side to null (unless already changed)
-            if ($postHashtag->getHashtag() === $this) {
-                $postHashtag->setHashtag(null);
-            }
+        if ($this->posts->removeElement($post)) {
+            $post->removeHashtag($this);
         }
-
         return $this;
     }
 
-    /**
-     * @return Collection<int, UserHashtagLike>
-     */
-    public function getUserHashtagLikes(): Collection
+    // Permet d'afficher directement le nom du hashtag quand on fait un echo de l'objet
+    public function __toString(): string
     {
-        return $this->userHashtagLikes;
-    }
-
-    public function addUserHashtagLike(UserHashtagLike $userHashtagLike): static
-    {
-        if (!$this->userHashtagLikes->contains($userHashtagLike)) {
-            $this->userHashtagLikes->add($userHashtagLike);
-            $userHashtagLike->setHashtag($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUserHashtagLike(UserHashtagLike $userHashtagLike): static
-    {
-        if ($this->userHashtagLikes->removeElement($userHashtagLike)) {
-            // set the owning side to null (unless already changed)
-            if ($userHashtagLike->getHashtag() === $this) {
-                $userHashtagLike->setHashtag(null);
-            }
-        }
-
-        return $this;
+        return $this->name ?? '';
     }
 }
